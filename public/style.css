@@ -495,6 +495,65 @@ body {
     gap: 10px;
 }
 
+/* Container for radio buttons */
+.options {
+    display: flex;
+    flex-direction: column;
+    align-items:start;
+    gap: 10px;
+    margin-top: 10px;
+}
+
+/* Hide the default radio button */
+input[type="radio"] {
+    display: none;
+}
+
+/* Custom radio button styling */
+input[type="radio"]+label {
+    display: flex;
+    align-items: left;
+    justify-content: center;
+    padding: 12px 20px;
+    font-size: 16px;
+    font-weight: bold;
+    cursor: pointer;
+    border-radius: 20px;
+    border: 2px solid #4CAF50;
+    /* Change color based on theme */
+    color: #4CAF50;
+    background-color: transparent;
+    transition: all 0.3s ease;
+    width: 150px;
+    text-align: center;
+}
+
+/* When radio button is selected */
+input[type="radio"]:checked+label {
+    background-color: #4CAF50;
+    color: white;
+    border-color: #388E3C;
+    box-shadow: 0px 4px 10px rgba(76, 175, 80, 0.5);
+}
+
+/* Hover effect */
+input[type="radio"]+label:hover {
+    background-color: rgba(76, 175, 80, 0.1);
+    color: #388E3C;
+    border-color: #388E3C;
+}
+
+/* Active effect (when clicked) */
+input[type="radio"]:active+label {
+    transform: scale(0.95);
+}
+
+/* Radio button group layout */
+.options div {
+    display: flex;
+    justify-content: center;
+}
+
 .radio-label {
     display: flex;
     align-items: center;
