@@ -100,8 +100,7 @@ function nextStep() {
             sendBotMessage("What is your relationship with the abuser?");
             break;
         case 3:
-            sendBotMessage("Which incident are you reporting? (Recent/Past)");
-            sendBotMessageWithOptions("Which incident?", ["Recent", "Past"]);
+            sendBotMessageWithOptions("Which incident are you reporting?", ["Recent", "Past"]);
             break;
         case 4:
             sendBotMessage("Let’s go over what happened recently. You can share as much or as little as you feel comfortable with.");
