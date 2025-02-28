@@ -1,0 +1,164 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Chatbot UI</title>
+    <link rel="stylesheet" href="style.css">
+    
+    
+</head>
+
+<body>
+
+
+    <div class="chat-container" id="chat-container" >
+        <div class="header">
+            <div class="chat-header">
+                <button id="chat-history-btn" onclick="toggleChatHistory()">📜
+                <span class="tooltip">Chat History</span></button>
+                <button id="new-chat-btn" onclick="startNewChat()">✚
+                <span class="tooltip">New Chat</span></button>
+            </div>
+            <div class="logo-container">
+                <img src="logo2.png" alt="Chatbot Logo" class="logo">
+            </div>
+            <div class="dark-mode-toggle">
+                <button id="dark-mode-btn" onclick="toggleDarkMode()">🌙</button>
+                <button id="info-btn" onclick="showInfo()">i</button>
+            </div>
+            <!-- Modal for Developer Info -->
+            <div id="info-modal" class="modal">
+                <div class="modal-content">
+                    <div class="modal-header">
+                        <span>About the Developers</span>
+                        <button class="close-btn" onclick="closeModal()">Close</button>
+                    </div>
+                    <div class="modal-body">
+                        <p><strong>Project Goal:</strong> To create an interactive and engaging chatbot interface for various
+                            applications. We aim to improve user experience through easy access to information.</p>
+            
+                        <div class="developers">
+                            <h4>Meet the Developers</h4>
+                            <div class="developer">
+                                <img src="developer.jpg" alt="Developer 1" class="developer-pic">
+                                <div class="developer-info">
+                                    <h5>KOUSHIK</h5>
+                                    <p>Role: Lead Developer</p>
+                                </div>
+                            </div>
+                            <div class="developer">
+                                <img src="developer1.jpg" alt="Developer 2" class="developer-pic">
+                                <div class="developer-info">
+                                    <h5>RAVI TARUN</h5>
+                                    <p>Role: AADUKU DENGEVADU</p>
+                                </div>
+                            </div>
+                            <div class="developer">
+                                <img src="developer3.jpg" alt="Developer 3" class="developer-pic">
+                                <div class="developer-info">
+                                    <h5>Developer Name 3</h5>
+                                    <p>Role: Backend Developer</p>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+        </div>
+
+        <!-- Chat History Sidebar -->
+        <div id="chat-history-sidebar" class="sidebar">
+            <div class="chat-history-header">
+                <h3>Chat History</h3>
+                <button id="clear-all-btn" onclick="clearAllChats()">🗑️ <span class="tooltip">Clear All Chats</span></button>
+            </div>
+            <ul id="chat-list"></ul>
+        </div>
+        
+        <div class="chat-box" id="chat-box">
+            <div class="bot-message message">
+                <img src="bot.png" class="profile-pic" alt="Bot Profile">
+                <div class="text">Hello! How can I help you today?</div>
+                <form>
+                    <input type="radio" id="recent" name="incident" value="Recent">
+                    <label for="recent">Recent</label>
+                
+                    <input type="radio" id="past" name="incident" value="Past">
+                    <label for="past">Past</label>
+                </form>
+
+            </div>
+            
+        </div>
+<div id="tsparticles">
+        <div class="input-container" >
+        
+            <textarea id="user-input"  placeholder="Type a message..." rows="1"></textarea>
+            <button onclick="sendMessage()">Send💡</button></div>
+        </div>
+                
+    </div>
+
+    
+    <script src="https://cdn.jsdelivr.net/npm/tsparticles@1.38.0/tsparticles.min.js"></script>
+    <script>
+        // Initialize the interactive background (particles)
+        tsParticles.load("tsparticles", {
+        particles: {
+            number: {
+                value: 100
+            },
+            color: {
+                value: "#00FFFF" // Neon cyan color
+            },
+            shape: {
+                type: "circle"
+            },
+            opacity: {
+                value: 0.6
+            },
+            size: {
+                value: 3
+            },
+            move: {
+                enable: true,
+                speed: 3,
+                direction: "none",
+                random: true,
+                straight: false,
+                outModes: "out"
+            }
+        },
+        interactivity: {
+            events: {
+                onhover: {
+                    enable: true,
+                    mode: "connect"
+                },
+                onclick: {
+                    enable: true,
+                    mode: "push"
+                }
+            }
+        }
+    });
+
+        // Chat logic (example, you can customize it more)
+        function sendMessage() {
+            const userInput = document.getElementById("user-input").value;
+            if (userInput.trim() !== "") {
+                const messageBox = document.createElement("div");
+                messageBox.classList.add("user-message", "message");
+                messageBox.innerHTML = `<div class="text">${userInput}</div>`;
+                document.getElementById("chat-box").appendChild(messageBox);
+                document.getElementById("user-input").value = "";
+            }
+        }
+    </script>
+    <script src="script.js"></script>
+</body>
+
+</html>

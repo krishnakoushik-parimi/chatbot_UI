@@ -1,0 +1,726 @@
+/* Body */
+body {
+    font-family: 'Arial', sans-serif;
+    margin: 0;
+    padding: 0;
+    background: #000;
+    color: #fff;
+    overflow: hidden;
+    height: 100vh;
+    display: flex;
+    flex-direction: column;
+    justify-content: space-between;
+}
+
+/* Chat Container - Soft Legal Theme */
+.chat-container {
+    display: flex;
+    flex-direction: column;
+    height: 100%;
+    position: relative;
+    background: linear-gradient(135deg, #f4f4f8, #eaeaea);
+    /* Soft neutral gradient */
+}
+/* Header - Elegant Legal Feel */
+.header {
+    background: #373d8b;
+    /* Deep blue legal tone */
+    color: #fdfdfd;
+    padding: 4px 20px;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    box-shadow: 0 4px 10px rgba(0, 0, 0, 0.2);
+    border-radius: 12px;
+    position: relative;
+    z-index: 10;
+    margin: 15px;
+}
+/* Centering the logo in the header */
+.logo-container {
+    position: absolute;
+    left: 50%;
+    transform: translateX(-50%);
+    text-align: center;
+    margin-bottom: 10px;;
+}
+
+/* Make the logo bold and big */
+.logo {
+    width: 320px;
+    /* Increase the size */
+    height: auto;
+    filter: drop-shadow(10px 10px 25px rgba(255, 255, 255, 0.9));
+    /* Glowing effect */
+    transition: transform 0.3s ease-in-out;
+}
+
+/* Add hover effect */
+.logo:hover {
+    transform: scale(1.2);
+    /* Slight zoom-in effect */
+}
+
+
+/* Chat Header */
+.chat-header {
+    display: flex;
+    align-items: center;
+    gap: 15px;
+}
+
+.chat-header button {
+    background: transparent;
+    border: 2px solid #ecf0f1;
+    /* Light border */
+    color: #ecf0f1;
+    font-size: 1.2rem;
+    padding: 10px 15px;
+    border-radius: 8px;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+}
+
+.chat-header button:hover {
+    background: #ecf0f1;
+    color: #34495e;
+    /* Darker text when hovered */
+    transform: translateY(-2px);
+    /* Slight hover effect */
+}
+
+.chat-header button:active {
+    transform: translateY(2px);
+    /* Button press effect */
+}
+
+.chat-header .tooltip {
+    position: absolute;
+    top: -25px;
+    left: 50%;
+    transform: translateX(-50%);
+    background: #34495e;
+    color: #ecf0f1;
+    padding: 5px 10px;
+    border-radius: 5px;
+    font-size: 0.9rem;
+    opacity: 0;
+    transition: opacity 0.2s ease;
+    visibility: hidden;
+}
+
+.chat-header button:hover .tooltip {
+    opacity: 1;
+    visibility: visible;
+}
+
+/* Dark Mode Toggle */
+.dark-mode-toggle {
+    display: flex;
+    gap: 20px;
+    align-items: center;
+}
+
+.dark-mode-toggle button {
+    background: transparent;
+    border: none;
+    color: #ecf0f1;
+    font-size: 1.5rem;
+    cursor: pointer;
+    transition: transform 0.2s ease;
+}
+
+.dark-mode-toggle button:hover {
+    transform: rotate(20deg);
+    /* Rotate effect on hover */
+    color: #f39c12;
+    /* Gold highlight when hovered */
+}
+/* Dark Mode Styles */
+.dark-mode {
+    background-color: #121212;
+    /* Dark background */
+    color: white;
+    /* Light text color */
+}
+
+.dark-mode .chat-box {
+    background-color: #1e1e1e;
+    /* Dark background for chat box */
+    color: white;
+}
+
+.dark-mode .input-container {
+    background-color: #2c2c2c;
+    /* Dark background for input container */
+}
+
+.dark-mode .button,
+.dark-mode button {
+    background-color: #444;
+    color: white;
+}
+
+/* Modal for Developer Info */
+#info-modal {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background-color: rgba(0, 0, 0, 0.7);
+    display: none;
+    align-items: center;
+    justify-content: center;
+    z-index: 100;
+}
+
+#info-modal.open {
+    display: flex;
+}
+
+.modal-content {
+    background-color: #868080;
+    padding: 30px;
+    border-radius: 10px;
+    width: 60%;
+    max-width: 800px;
+    box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
+}
+
+.modal-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    border-bottom: 2px solid #eee;
+    padding-bottom: 15px;
+}
+
+.modal-header span {
+    font-size: 1.6rem;
+    font-weight: bold;
+}
+
+.close-btn {
+    background: #e74c3c;
+    color: white;
+    padding: 10px 15px;
+    border-radius: 8px;
+    cursor: pointer;
+    transition: background 0.3s ease;
+}
+
+.close-btn:hover {
+    background: #c0392b;
+}
+
+.developers {
+    margin-top: 20px;
+}
+
+.developer {
+    display: flex;
+    align-items: center;
+    margin-bottom: 15px;
+}
+
+.developer-pic {
+    width: 50px;
+    height: 50px;
+    border-radius: 50%;
+    margin-right: 15px;
+}
+
+.developer-info h5 {
+    font-size: 1.2rem;
+    font-weight: 500;
+}
+
+.developer-info p {
+    color: #7f8c8d;
+}
+
+.close-btn {
+    background: #4e91f7;
+    color: #fff;
+    padding: 8px 12px;
+    border: none;
+    border-radius: 6px;
+    cursor: pointer;
+}
+
+.close-btn:hover {
+    background: #3578e5;
+}
+
+/* Chat History Sidebar */
+.sidebar {
+    position: fixed;
+    top: 0;
+    right: -300px;
+    width: 300px;
+    background: #1c1f3c;
+    height: 100%;
+    padding: 20px;
+    box-shadow: -6px 0 12px rgba(0, 0, 0, 0.5);
+    transition: right 0.3s ease;
+}
+
+.chat-history-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    color: #fff;
+}
+
+.chat-history-header h3 {
+    margin: 0;
+}
+
+#clear-all-btn {
+    background: #e74c3c;
+    color: white;
+    border: none;
+    padding: 10px 20px;
+    border-radius: 10px;
+    cursor: pointer;
+    transition: all 0.3s ease;
+}
+
+#clear-all-btn:hover {
+    background: #c0392b;
+}
+
+#chat-list {
+    margin-top: 20px;
+    list-style: none;
+    padding: 0;
+}
+
+.chat-history-item {
+    background: rgba(255, 255, 255, 0.1);
+    margin: 5px 0;
+    padding: 10px;
+    border-radius: 10px;
+}
+
+/* Chat Box - Smooth and Elegant */
+.chat-box {
+    flex: 1;
+    overflow-y: auto;
+    padding: 20px 30px;
+    display: flex;
+    flex-direction: column;
+    gap: 20px;
+    background: white;
+    /* Soft muted gradient */
+    background-size: 200% 200%;
+    animation: chatBoxAnimation 6s ease infinite;
+    border-radius: 20px;
+    box-shadow: 0 8px 20px rgba(0, 0, 0, 0.2);
+    margin-top: 10px;
+    position: relative;
+    z-index: 9;
+    transition: all 0.3s ease-in-out;
+    margin-left: 15px;
+   
+}
+
+/* Subtle Animation for a Dynamic Background */
+@keyframes chatBoxAnimation {
+    0% {
+        background-position: 0% 50%;
+    }
+
+    50% {
+        background-position: 100% 50%;
+    }
+
+    100% {
+        background-position: 0% 50%;
+    }
+}
+
+@keyframes spaceAnimation {
+    0% {
+        background-position: 0% 50%;
+    }
+
+    50% {
+        background-position: 100% 50%;
+    }
+
+    100% {
+        background-position: 0% 50%;
+    }
+}
+
+
+
+.bot-message,
+.user-message {
+    display: flex;
+    align-items: center;
+    padding: 15px;
+    border-radius: 12px;
+    max-width: 80%;
+    margin-bottom: 15px;
+    opacity: 0;
+    animation: fadeIn 0.5s forwards;
+    word-wrap: break-word;
+    background: rgba(255, 255, 255, 0.15);
+    box-shadow: 0 4px 15px rgba(255, 255, 255, 0.2);
+    transition: all 0.3s ease-in-out;
+}
+
+.user-message {
+    background: #4e91f7;
+    color: white;
+    align-self: flex-end;
+    border-radius: 15px 15px 0 15px;
+    text-align: right;
+    box-shadow: 0 6px 15px rgba(52, 152, 219, 0.5);
+
+}
+
+.bot-message {
+    background: #2ecc71;
+    color: white;
+    align-self: flex-start;
+    border-radius: 15px 15px 15px 0;
+    box-shadow: 0 6px 15px rgba(46, 204, 113, 0.5);
+}
+
+/* Fade-in Animation */
+@keyframes fadeIn {
+    0% {
+        opacity: 0;
+        transform: translateY(10px);
+    }
+
+    100% {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+
+
+/* Profile Picture for Bot and User */
+.profile-pic {
+    width: 40px;
+    /* Adjust size as needed */
+    height: 40px;
+    border-radius: 50%;
+    /* Circular shape */
+    object-fit: cover;
+    /* Ensures the image fills the container properly */
+    margin-right: 10px;
+    /* Space between image and message text */
+    box-shadow: 0 4px 10px rgba(0, 0, 0, 0.2);
+    /* Optional: Adds a subtle shadow to make the image pop */
+}
+
+/* Chat Message Styling */
+.message {
+    background: white;
+    border-radius: 12px;
+        font-size: 14px;
+            font-weight: 400;
+            line-height: 20px;
+    padding: 12px 16px;
+    max-width: 75%;
+    box-shadow: 0px 2px 10px rgba(0, 0, 0, 0.1);
+    font-size: 16px;
+    color: #2c3e50;
+    font-family: Inter, sans-serif;
+    transition: transform 0.2s ease-in-out;
+}
+
+/* Chat Bubbles Animation */
+.message:hover {
+    transform: scale(1.02);
+}
+
+/* Subtle Shadow on Hover */
+.message:hover {
+    box-shadow: 0px 4px 15px rgba(0, 0, 0, 0.15);
+}
+
+/* Bot Message - Professional & Calm */
+.bot-message {
+    align-self: flex-start;
+    background: #dfe7ec;
+    /* Muted blue-grey for legal aesthetic */
+    color: #1f2b38;
+    border-left: 5px solid #2c3e50;
+}
+
+.bot-message .profile-pic {
+    margin-left: 10px;
+    /* Adjust to your preference */
+    margin-right: 15px;
+    /* Adjust to give space between pic and message */
+}
+
+
+/* User Message - Deep Blue for Emphasis */
+.user-message {
+    align-self: flex-end;
+    background: #2c3e50;
+    /* Deep legal blue */
+    color: white;
+    border-right: 5px solid #1f2b38;
+}
+.user-message .profile-pic {
+    width: 40px;
+        height: 40px;
+        border-radius: 50%;
+        object-fit: cover;
+        
+        
+}
+.question-text {
+    font-size: 18px;
+    font-weight: bold;
+    margin-bottom: 10px;
+}
+
+.options-container {
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+}
+
+.radio-label {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    font-size: 16px;
+    padding: 8px;
+    cursor: pointer;
+}
+
+.radio-input {
+    accent-color: #4a90e2;
+    transform: scale(1.2);
+}
+
+.radio-label:hover {
+    background: #f0f0f0;
+    border-radius: 8px;
+    transition: background 0.3s ease;
+}
+
+/* Ensure the radio options appear below the question */
+.bot-message .radio-options {
+    display: flex;
+    justify-content: flex-start;
+    flex-wrap: wrap;
+    margin-top: 10px; /* Adds space between text and options */
+}
+
+/* Sidebar (Right Side) */
+.sidebar {
+    position: fixed;
+    top: 0;
+    right: -290px;
+    /* Initially hidden to the right */
+    width: 250px;
+    height: 100%;
+    background-color: #2c3e50;
+    /* Dark background color */
+    color: white;
+    padding: 20px;
+    overflow-y: auto;
+    z-index: 999;
+    transition: right 0.3s ease-in-out;
+    /* Smooth transition */
+}
+
+/* When Sidebar is Expanded */
+.sidebar.open {
+    right: 0;
+    /* Move sidebar into view */
+}
+
+/* Chat Container (Adjust layout when sidebar is expanded) */
+.chat-container {
+    display: flex;
+    flex-direction: column;
+    padding-right: 20px;
+    /* Default padding */
+    height: 100vh;
+    overflow: hidden;
+    transition: padding-right 0.3s ease-in-out;
+    /* Smooth transition */
+}
+
+/* When Sidebar is Expanded, Compress Main Content */
+.chat-container.sidebar-expanded {
+    padding-right: 330px;
+    /* Compress content by increasing the right padding */
+}
+
+/* Chat Header */
+.chat-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    background-color: #34495e;
+    padding: 15px;
+    color: white;
+    border-radius: 10px;
+}
+
+/* Chat History Header */
+.chat-history-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 15px;
+}
+
+.chat-history-header h3 {
+    font-size: 1.5rem;
+    color: #ecf0f1;
+}
+
+.chat-history-header button {
+    background: #e74c3c;
+    color: white;
+    border: none;
+    padding: 8px;
+    border-radius: 5px;
+    cursor: pointer;
+    transition: background 0.3s;
+}
+
+.chat-history-header button:hover {
+    background: #c0392b;
+}
+
+/* Chat List */
+#chat-list {
+    list-style-type: none;
+    padding: 0;
+}
+
+#chat-list li {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    background: #34495e;
+    margin: 10px 0;
+    padding: 10px;
+    border-radius: 5px;
+    color: white;
+    cursor: pointer;
+    transition: background 0.3s;
+}
+
+#chat-list li:hover {
+    background: #2980b9;
+}
+
+
+/* Input Section */
+.input-container {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    padding: 10px 20px;
+    background: rgba(0, 0, 0, 0.05);
+    border-top: 1px solid #dcdcdc;
+    width: 95%;
+    border-radius: 15px;
+    box-shadow: 0 3px 8px rgba(0, 0, 0, 0.1);
+    margin: 10px 15px;
+}
+/* Textarea */
+#user-input {
+    width: 50%;
+    padding: 22px 30px;
+    border-radius: 5px;
+    border:#000;
+    border-color: #000;
+    font-size: 18px;
+    resize: none;
+    background-color: #f7f7f7;
+    color: white;
+}
+#user-input:focus {
+    outline: none;
+    border: 1px solid #ecf0f1;
+    /* Adds a subtle focus effect */
+}
+.input-container textarea,
+.input-container button {
+    border-radius: 8px;
+    box-shadow: 0 4px 10px rgb(255, 255, 255);
+}
+
+.input-container textarea {
+    background-color: #333;
+    color: #f8f8f8;
+    border: none;
+    padding: 10px;
+    resize: none;
+    width: 50%;
+    border-radius: 10px;
+    box-shadow: 0 4px 15px rgba(255, 255, 255, 0.3);
+}
+
+/* Send Button */
+.input-container button {
+    padding: 15px 35px;
+    background-color: #35547e;
+    color: white;
+    font-size: 17px;
+    border: none;
+    border-radius: 5px;
+    cursor: pointer;
+    transition: background-color 0.3s ease;
+}
+
+.input-container button:hover {
+    background-color: #16a085;
+    /* Darker shade of the button color on hover */
+}
+/* Footer */
+.footer {
+    background: linear-gradient(135deg, #dbd7d7, #ffffff);
+    padding: 15px 0;
+    text-align: center;
+    color: white;
+    box-shadow: 0 -4px 8px rgba(0, 0, 0, 0.3);
+}
+
+.footer p {
+    font-size: 16px;
+    color: #bbb;
+    
+}
+
+.footer a {
+    color: #4e91f7;
+    text-decoration: none;
+}
+
+.footer a:hover {
+    text-decoration: underline;
+}
+
+/* Hover Effects */
+.user-message:hover {
+    background: #5f9fd8;
+    box-shadow: 0 8px 20px rgba(52, 152, 219, 0.8);
+}
+
+.bot-message:hover {
+    background: #cae9d7;
+    box-shadow: 0 8px 20px rgba(102, 199, 142, 0.8);
+}
