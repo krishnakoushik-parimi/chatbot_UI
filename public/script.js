@@ -15,12 +15,15 @@ window.onload = function () {
     startChat();
 };
 
-// Start a new chat session
+// Function to start the chat and send the greeting
 function startChat() {
     chatState.step = 0;
     chatState.userResponses = {};
     chatBox.innerHTML = "";
-    sendBotMessage("Hello, I am {NAME}! I am here to support you in documenting your experience for a 'Domestic Violence Protection Order'");
+
+    // Send the initial greeting
+    sendBotMessage("Hello, I am {NAME}! I am here to support you in documenting your experience for a 'Domestic Violence Protection Order'.");
+    sendBotMessage("You can take this at your own pace. If at any point you need a break or have any concerns, you can let me know!");
     sendBotMessageWithOptions("Are you ready to begin?", ["Yes", "No"]);
 }
 
@@ -31,12 +34,12 @@ function sendBotMessage(message) {
     chatBox.scrollTop = chatBox.scrollHeight;
 }
 
-// Function to display a message with options (radio buttons)
+
+// Function to send a message with options (radio buttons)
 function sendBotMessageWithOptions(question, options) {
     let botMessage = createMessageElement("bot", question);
     chatBox.appendChild(botMessage);
 
-    // Create radio button options
     let optionsDiv = document.createElement("div");
     optionsDiv.classList.add("options");
 
@@ -65,30 +68,30 @@ function sendBotMessageWithOptions(question, options) {
     chatBox.appendChild(optionsDiv);
     chatBox.scrollTop = chatBox.scrollHeight;
 }
-
-// Handle user response and update step
+// Function to handle responses
 function handleResponse(answer) {
     let userMessage = createMessageElement("user", answer);
     chatBox.appendChild(userMessage);
 
-    // Save the user response based on the current step
+    // Save the response based on current step
     chatState.userResponses[chatState.step] = answer;
 
-    // Lock the options and prevent further changes
+    // Lock the options and move to next step
     disableOptions();
 
-    // Update the chatState to proceed to the next step
-    chatState.step++;
-
-    // Proceed to the next step after a short delay
+    // Move to next step after a short delay
     setTimeout(() => {
-        nextStep();
+        chatState.step++;
+        nextStep();  // Proceed to the next step
     }, 500);
 }
-
-// Handle the next step in the conversation based on the chat state
+// Function to manage the next step
 function nextStep() {
     switch (chatState.step) {
+        case 0:
+            // Step 0: Initial greeting
+            startChat();
+            break;
         case 1:
             sendBotMessage("Let’s start with some basic details. You can skip anything you’re not comfortable sharing.");
             sendBotMessage("What is your name?");
@@ -117,6 +120,39 @@ function nextStep() {
             break;
     }
 }
+
+// Ensure the chat flow follows the correct sequence
+function ensureGreeting() {
+    if (chatState.step === 0) {
+        startChat();  // Send greeting first
+    }
+}
+
+// Call ensureGreeting on page load
+window.onload = function () {
+    ensureGreeting();  // Make sure greeting is shown first
+};
+
+// Handle the response for name and other text inputs
+userInput.addEventListener("keydown", function (event) {
+    if (event.key === "Enter" && !event.shiftKey) {
+        event.preventDefault();
+        let userMessage = userInput.value.trim();
+        if (userMessage !== "") {
+            handleResponse(userMessage);
+            userInput.value = "";  // Clear input field
+        }
+    }
+});
+
+// Button click event for sending messages
+document.getElementById("send-button").addEventListener("click", function () {
+    let message = userInput.value.trim();
+    if (message !== "") {
+        handleResponse(message);
+        userInput.value = "";  // Clear input field
+    }
+});
 
 // Disable radio options after selection
 function disableOptions() {
