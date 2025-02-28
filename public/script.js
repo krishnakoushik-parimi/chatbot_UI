@@ -1,6 +1,7 @@
 // Global variables and state
 let chatBox = document.getElementById("chat-box");
 let userInput = document.getElementById("user-input");
+let sendButton = document.getElementById("send-button");
 
 let chatState = {
     step: 0,
@@ -79,39 +80,10 @@ function handleResponse(answer) {
     // Update the chatState to proceed to the next step
     chatState.step++;
 
-    // Proceed to the next step after a slight delay
+    // Proceed to the next step after a short delay
     setTimeout(() => {
         nextStep();
     }, 500);
-}
-
-// Disable radio options after selection
-function disableOptions() {
-    let optionsDiv = document.querySelector(".options");
-    let radios = optionsDiv.querySelectorAll("input[type='radio']");
-    radios.forEach(radio => {
-        radio.disabled = true; // Disable all radio buttons after response
-    });
-}
-
-// Function to create message elements for user and bot
-function createMessageElement(sender, text) {
-    let messageDiv = document.createElement("div");
-    messageDiv.className = `message ${sender}-message`;
-
-    let profilePic = document.createElement("img");
-    profilePic.className = "profile-pic";
-    profilePic.src = sender === "user" ? "user.png" : "bot.png";
-    profilePic.alt = sender === "user" ? "User Profile" : "Bot Profile";
-
-    let messageText = document.createElement("div");
-    messageText.className = "text";
-    messageText.textContent = text;
-
-    messageDiv.appendChild(profilePic);
-    messageDiv.appendChild(messageText);
-
-    return messageDiv;
 }
 
 // Handle the next step in the conversation based on the chat state
@@ -146,7 +118,70 @@ function nextStep() {
     }
 }
 
-// Function to save the chat session to localStorage
+// Disable radio options after selection
+function disableOptions() {
+    let optionsDiv = document.querySelector(".options");
+    let radios = optionsDiv.querySelectorAll("input[type='radio']");
+    radios.forEach(radio => {
+        radio.disabled = true; // Disable all radio buttons after response
+    });
+}
+
+// Function to create message elements for user and bot
+function createMessageElement(sender, text) {
+    let messageDiv = document.createElement("div");
+    messageDiv.className = `message ${sender}-message`;
+
+    let profilePic = document.createElement("img");
+    profilePic.className = "profile-pic";
+    profilePic.src = sender === "user" ? "user.png" : "bot.png";
+    profilePic.alt = sender === "user" ? "User Profile" : "Bot Profile";
+
+    let messageText = document.createElement("div");
+    messageText.className = "text";
+    messageText.textContent = text;
+
+    messageDiv.appendChild(profilePic);
+    messageDiv.appendChild(messageText);
+
+    return messageDiv;
+}
+
+// Trigger the greeting when the page loads
+window.onload = function () {
+    startGreeting();
+};
+
+// Function to send greeting message
+function startGreeting() {
+    sendBotMessage("Hello, I am {NAME}!");
+    sendBotMessage("I am here to support you in documenting your experience for a 'Domestic Violence Protection Order'.");
+    sendBotMessage("You can take this at your own pace, If at any point you need a break or have any concerns, you can let me know!");
+    sendBotMessageWithOptions("Are you ready to begin?", ["Yes", "No"]);
+}
+
+// Handle the name input and move to the next step
+userInput.addEventListener("keydown", function (event) {
+    if (event.key === "Enter" && !event.shiftKey) {
+        event.preventDefault();
+        let userMessage = userInput.value.trim();
+        if (userMessage !== "") {
+            handleResponse(userMessage);
+            userInput.value = ""; // Clear the input field
+        }
+    }
+});
+
+// Prevent default Enter behavior and send message
+document.getElementById("send-button").addEventListener("click", function () {
+    let message = userInput.value.trim();
+    if (message !== "") {
+        handleResponse(message);
+        userInput.value = ""; // Clear the input field
+    }
+});
+
+// Save chat history to localStorage
 function saveChatSession() {
     let currentChat = JSON.parse(localStorage.getItem("currentChat")) || [];
     currentChat.push({ sender: "user", message: userInput.value });
@@ -208,25 +243,5 @@ function loadDarkModePreference() {
         document.getElementById("dark-mode-btn").textContent = "☀️";
     } else {
         document.getElementById("dark-mode-btn").textContent = "🌙";
-    }
-}
-
-// Prevent default Enter behavior and send message
-document.getElementById("user-input").addEventListener("keydown", function (event) {
-    if (event.key === "Enter" && !event.shiftKey) {
-        event.preventDefault();
-        sendMessage();
-    }
-});
-
-// Send the user's message
-function sendMessage() {
-    let message = userInput.value.trim();
-    if (message !== "") {
-        let userMessage = createMessageElement("user", message);
-        chatBox.appendChild(userMessage);
-        saveChatSession();
-        userInput.value = "";
-        chatBox.scrollTop = chatBox.scrollHeight;
     }
 }
