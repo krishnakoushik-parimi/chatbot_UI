@@ -61,30 +61,33 @@ function sendBotMessageWithOptions(question, options) {
 
         // Attach event listener for when user selects an option
         radio.addEventListener("change", () => {
-            handleResponse(option);
+            handleResponse(option, question);
         });
     });
 
     chatBox.appendChild(optionsDiv);
     chatBox.scrollTop = chatBox.scrollHeight;
 }
-// Function to handle responses
-function handleResponse(answer) {
+function handleResponse(answer, question) {
+    const chatBox = document.getElementById("chat-box");
     let userMessage = createMessageElement("user", answer);
     chatBox.appendChild(userMessage);
 
-    // Save the response based on current step
+    // Save the user response based on the current step
     chatState.userResponses[chatState.step] = answer;
 
-    // Lock the options and move to next step
-    disableOptions();
+    // Disable only the options related to the current question
+    disableOptions(question);
 
-    // Move to next step after a short delay
+    // Update the chatState to proceed to the next step
+    chatState.step++;
+
+    // Proceed to the next step
     setTimeout(() => {
-        chatState.step++;
-        nextStep();  // Proceed to the next step
+        nextStep();
     }, 500);
 }
+
 // Function to manage the next step
 function nextStep() {
     switch (chatState.step) {
@@ -154,13 +157,21 @@ document.getElementById("send-button").addEventListener("click", function () {
 });
 
 // Disable radio options after selection
-function disableOptions() {
-    let optionsDiv = document.querySelector(".options");
-    let radios = optionsDiv.querySelectorAll("input[type='radio']");
-    radios.forEach(radio => {
-        radio.disabled = true; // Disable all radio buttons after response
+function disableOptions(question) {
+    let optionsDivs = document.querySelectorAll(".options");
+
+    optionsDivs.forEach(optionsDiv => {
+        let radios = optionsDiv.querySelectorAll(`input[name='${question}']`);
+
+        radios.forEach(radio => {
+            if (!radio.checked) {
+                radio.disabled = true; // Disable only unselected options
+            }
+        });
     });
 }
+
+
 
 // Function to create message elements for user and bot
 function createMessageElement(sender, text) {
