@@ -73,14 +73,31 @@ function handleResponse(answer, question) {
     let userMessage = createMessageElement("user", answer);
     chatBox.appendChild(userMessage);
 
-    // Save the user response based on the current step
+    // Save the user response
     chatState.userResponses[chatState.step] = answer;
 
-    // Disable only the options related to the current question
+    // Disable radio buttons for the current question
     disableOptions(question);
 
-    // Update the chatState to proceed to the next step
-    chatState.step++;
+    // If answering "Which incident are you reporting?" (Step 3)
+    if (chatState.step === 3) {
+        chatState.incidentType = answer; // Store the selected incident type (Recent/Past)
+
+        // Dynamically generate the follow-up question based on selection
+        sendBotMessage(`Now, let’s talk about any ${answer} incidents that have led to this situation.`);
+        sendBotMessage(`Please describe the ${answer} incident.`);
+
+        // Move to a new sub-step (Step 4), but do NOT proceed to the next step automatically
+        chatState.step = 4;
+        return;
+    }
+
+    // If user has just described the incident (Step 4), proceed to Step 5
+    if (chatState.step === 4) {
+        chatState.step = 5;
+    } else {
+        chatState.step++; // Normal progression
+    }
 
     // Proceed to the next step
     setTimeout(() => {
@@ -88,13 +105,8 @@ function handleResponse(answer, question) {
     }, 500);
 }
 
-// Function to manage the next step
 function nextStep() {
     switch (chatState.step) {
-        case 0:
-            // Step 0: Initial greeting
-            startChat();
-            break;
         case 1:
             sendBotMessage("Let’s start with some basic details. You can skip anything you’re not comfortable sharing.");
             sendBotMessage("What is your name?");
@@ -105,15 +117,7 @@ function nextStep() {
         case 3:
             sendBotMessageWithOptions("Which incident are you reporting?", ["Recent", "Past"]);
             break;
-        case 4:
-            sendBotMessage("Let’s go over what happened recently. You can share as much or as little as you feel comfortable with.");
-            sendBotMessage("Please describe the recent incident.");
-            break;
         case 5:
-            sendBotMessage("Now, let’s talk about any past incidents that have led to this situation.");
-            sendBotMessage("Please describe the past incidents.");
-            break;
-        case 6:
             sendBotMessage("How has this affected you? This helps ensure your statement fully reflects your experience.");
             sendBotMessage("Please describe the impact.");
             break;
@@ -122,6 +126,10 @@ function nextStep() {
             break;
     }
 }
+
+
+
+
 
 // Ensure the chat flow follows the correct sequence
 function ensureGreeting() {
@@ -170,6 +178,7 @@ function disableOptions(question) {
         });
     });
 }
+
 
 
 
