@@ -2,11 +2,15 @@
 let chatBox = document.getElementById("chat-box");
 let userInput = document.getElementById("user-input");
 let sendButton = document.getElementById("send-button");
+let chatList = document.getElementById("chat-list");
 
 let chatState = {
     step: 0,
-    userResponses: {}
+    userResponses: {},
+    chatId: generateChatId()
 };
+
+let chatHistory = JSON.parse(localStorage.getItem("chatHistory")) || [];
 
 // Initialize chat history and dark mode on page load
 window.onload = function () {
@@ -15,27 +19,74 @@ window.onload = function () {
     startChat();
 };
 
-// Function to start the chat and send the greeting
-function startChat() {
-    chatState.step = 0;
-    chatState.userResponses = {};
-    chatBox.innerHTML = "";
+// Function to generate unique chat ID
+function generateChatId() {
+    return "chat-" + new Date().getTime();
+}
 
-    // Send the initial greeting
+// Function to start a new chat
+function startChat() {
+    saveCurrentChat();
+    chatState = {
+        step: 0,
+        userResponses: {},
+        chatId: generateChatId()
+    };
+    chatBox.innerHTML = "";
     sendBotMessage("Hello, I am {NAME}! I am here to support you in documenting your experience for a 'Domestic Violence Protection Order'.");
     sendBotMessage("You can take this at your own pace. If at any point you need a break or have any concerns, you can let me know!");
     sendBotMessageWithOptions("Are you ready to begin?", ["Yes", "No"]);
+    updateChatHistoryUI();
 }
 
-// Function to send a message from the bot
+
+// Save the current chat to history
+function saveCurrentChat() {
+    if (chatState.userResponses && Object.keys(chatState.userResponses).length > 0) {
+        let existingChatIndex = chatHistory.findIndex(chat => chat.chatId === chatState.chatId);
+        if (existingChatIndex !== -1) {
+            chatHistory[existingChatIndex] = { ...chatState, messages: chatBox.innerHTML };
+        } else {
+            chatHistory.push({ ...chatState, messages: chatBox.innerHTML });
+        }
+        localStorage.setItem("chatHistory", JSON.stringify(chatHistory));
+    }
+}
+
+
+
+// Add chat to sidebar
+function addChatToSidebar(chat) {
+    let chatItem = document.createElement("li");
+    chatItem.textContent = `Chat ${chat.chatId.split("-")[1]}`;
+    chatItem.dataset.chatId = chat.chatId;
+    chatItem.addEventListener("click", () => restoreChat(chat.chatId));
+    chatList.appendChild(chatItem);
+}
+
+// Restore a specific chat
+function restoreChat(chatId) {
+    let chat = chatHistory.find(c => c.chatId === chatId);
+    if (chat) {
+        chatState = { ...chat };
+        chatBox.innerHTML = chat.messages;
+    }
+}
+
+// Update the sidebar chat history UI
+function updateChatHistoryUI() {
+    chatList.innerHTML = "";
+    chatHistory.forEach(chat => addChatToSidebar(chat));
+}
+
+// Function to send bot message
 function sendBotMessage(message) {
     let botMessage = createMessageElement("bot", message);
     chatBox.appendChild(botMessage);
     chatBox.scrollTop = chatBox.scrollHeight;
 }
 
-
-// Function to send a message with options (radio buttons)
+// Function to send bot message with options
 function sendBotMessageWithOptions(question, options) {
     let botMessage = createMessageElement("bot", question);
     chatBox.appendChild(botMessage);
@@ -59,15 +110,13 @@ function sendBotMessageWithOptions(question, options) {
         radioWrapper.appendChild(label);
         optionsDiv.appendChild(radioWrapper);
 
-        // Attach event listener for when user selects an option
-        radio.addEventListener("change", () => {
-            handleResponse(option, question);
-        });
+        radio.addEventListener("change", () => handleResponse(option, question));
     });
 
     chatBox.appendChild(optionsDiv);
     chatBox.scrollTop = chatBox.scrollHeight;
 }
+
 function handleResponse(answer, question) {
     const chatBox = document.getElementById("chat-box");
     let userMessage = createMessageElement("user", answer);
@@ -202,6 +251,20 @@ function createMessageElement(sender, text) {
     return messageDiv;
 }
 
+// Load chat history in sidebar
+function loadChatHistory() {
+    chatHistory.forEach(chat => addChatToSidebar(chat));
+}
+
+
+// Clear all chats
+function clearAllChats() {
+    localStorage.removeItem("chatHistory");
+    chatHistory = [];
+    chatList.innerHTML = "";
+    chatBox.innerHTML = "";
+    startChat();
+}
 // Trigger the greeting when the page loads
 window.onload = function () {
     startGreeting();
@@ -236,53 +299,6 @@ document.getElementById("send-button").addEventListener("click", function () {
     }
 });
 
-// Save chat history to localStorage
-function saveChatSession() {
-    let currentChat = JSON.parse(localStorage.getItem("currentChat")) || [];
-    currentChat.push({ sender: "user", message: userInput.value });
-    localStorage.setItem("currentChat", JSON.stringify(currentChat));
-}
-
-// Load chat history and display
-function loadChatHistory() {
-    let chatSessions = JSON.parse(localStorage.getItem("chatSessions")) || [];
-    chatSessions.forEach(chat => {
-        let li = document.createElement("li");
-        li.innerText = new Date(chat.id).toLocaleString();
-        li.onclick = () => loadChat(chat.id);
-
-        let deleteBtn = document.createElement("button");
-        deleteBtn.innerText = "❌";
-        deleteBtn.onclick = (e) => {
-            e.stopPropagation();
-            deleteChat(chat.id);
-        };
-
-        li.appendChild(deleteBtn);
-        document.getElementById("chat-list").appendChild(li);
-    });
-}
-
-// Load a specific chat from storage
-function loadChat(chatId) {
-    let chatSessions = JSON.parse(localStorage.getItem("chatSessions")) || [];
-    let chat = chatSessions.find(c => c.id === chatId);
-    if (chat) {
-        chatBox.innerHTML = "";
-        chat.messages.forEach(msg => {
-            let messageElem = createMessageElement(msg.sender, msg.message);
-            chatBox.appendChild(messageElem);
-        });
-    }
-}
-
-// Delete a specific chat session
-function deleteChat(chatId) {
-    let chatSessions = JSON.parse(localStorage.getItem("chatSessions")) || [];
-    chatSessions = chatSessions.filter(chat => chat.id !== chatId);
-    localStorage.setItem("chatSessions", JSON.stringify(chatSessions));
-    loadChatHistory();
-}
 
 // Function to toggle the chat history sidebar visibility
 function toggleChatHistory() {
