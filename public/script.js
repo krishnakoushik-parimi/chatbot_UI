@@ -287,14 +287,19 @@ function deleteChat(chatId) {
 // Function to toggle the chat history sidebar visibility
 function toggleChatHistory() {
     let body = document.body;
+    let chatContainer = document.querySelector(".chat-container"); // This is the main content container
     let sidebar = document.getElementById("chat-history-sidebar");
 
-    // Toggle the 'sidebar-open' class on the body for global styling
+    // Toggle the 'sidebar-open' class on the body for global styling (can control dimming effect etc.)
     body.classList.toggle("sidebar-open");
 
     // Toggle the 'open' class on the sidebar to control visibility
     sidebar.classList.toggle("open");
+
+    // Toggle the 'sidebar-expanded' class on the chat-container to adjust the content width when sidebar is expanded
+    chatContainer.classList.toggle("sidebar-expanded");
 }
+
 
 
 // Toggle dark mode
