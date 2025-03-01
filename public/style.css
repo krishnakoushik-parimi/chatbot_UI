@@ -709,7 +709,7 @@ input[type="radio"]:active+label {
     font-size: 18px;
     resize: none;
     background-color: #f7f7f7;
-    color: white;
+    color: rgb(5, 5, 5);
 }
 #user-input:focus {
     outline: none;
