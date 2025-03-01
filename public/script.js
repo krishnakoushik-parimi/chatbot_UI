@@ -284,6 +284,19 @@ function deleteChat(chatId) {
     loadChatHistory();
 }
 
+// Function to toggle the chat history sidebar visibility
+function toggleChatHistory() {
+    let body = document.body;
+    let sidebar = document.getElementById("chat-history-sidebar");
+
+    // Toggle the 'sidebar-open' class on the body for global styling
+    body.classList.toggle("sidebar-open");
+
+    // Toggle the 'open' class on the sidebar to control visibility
+    sidebar.classList.toggle("open");
+}
+
+
 // Toggle dark mode
 function toggleDarkMode() {
     document.body.classList.toggle("dark-mode");
