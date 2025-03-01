@@ -521,8 +521,8 @@ input[type="radio"]+label {
     border-radius: 20px;
     border: 2px solid #4CAF50;
     /* Change color based on theme */
-    color: #4CAF50;
-    background-color: transparent;
+    color: #000000;
+    background-color: white;
     transition: all 0.3s ease;
     width: 150px;
     text-align: center;
@@ -735,20 +735,35 @@ input[type="radio"]:active+label {
 
 /* Send Button */
 .input-container button {
-    padding: 15px 35px;
-    background-color: #35547e;
+    width: 50px;
+    height: 50px;
+    padding: 0;
+    background-color: #f8f8f8;
     color: white;
     font-size: 17px;
     border: none;
-    border-radius: 5px;
+    border-radius: 50%;
     cursor: pointer;
-    transition: background-color 0.3s ease;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: background-color 0.3s ease, transform 0.2s;
+    overflow: hidden;
 }
 
-.input-container button:hover {
-    background-color: #16a085;
-    /* Darker shade of the button color on hover */
+/* Ensure PNG is properly displayed */
+.input-container button img {
+    width: 70%;
+    height: auto;
+    object-fit: contain;
 }
+
+/* Hover Effect */
+.input-container button:hover {
+    background-color: #5f9fd8;
+    transform: scale(1.1);
+}
+
 /* Footer */
 .footer {
     background: linear-gradient(135deg, #dbd7d7, #ffffff);

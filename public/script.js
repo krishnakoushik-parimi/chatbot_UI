@@ -33,8 +33,8 @@ function startChat() {
         chatId: generateChatId()
     };
     chatBox.innerHTML = "";
-    sendBotMessage("Hello, I am {NAME}! I am here to support you in documenting your experience for a 'Domestic Violence Protection Order'.");
-    sendBotMessage("You can take this at your own pace. If at any point you need a break or have any concerns, you can let me know!");
+    sendBotMessage("Hello, I am StaG! I can support you in documenting your experience for a 'Domestic Violence Protection Order'.");
+    sendBotMessage("You can take this at your own pace. Please feel comfortable sharing your experiences!");
     sendBotMessageWithOptions("Are you ready to begin?", ["Yes", "No"]);
     updateChatHistoryUI();
 }
