@@ -130,11 +130,14 @@ function handleResponse(answer, question) {
 
     // If answering "Which incident are you reporting?" (Step 3)
     if (chatState.step === 3) {
-        chatState.incidentType = answer; // Store the selected incident type (Recent/Past)
+        chatState.incidentType = answer; // Store the selected incident type (Most Recent/Past)
 
         // Dynamically generate the follow-up question based on selection
-        sendBotMessage(`Now, let’s talk about any ${answer} incidents that have led to this situation.`);
-        sendBotMessage(`Please describe the ${answer} incident.`);
+        if (chatState.incidentType === "Most Recent") {
+            sendBotMessage("Describe the most recent violent act, fear, or threat of violence, and why the temporary order should be entered today without notice to the respondent. Please provide specific details, including the approximate dates and police responses.");
+        } else if (chatState.incidentType === "Past Incidents") {
+            sendBotMessage("Describe the past incidents where you experienced violence, were afraid of injury, or where the respondent threatened to harm or kill you. Please include specific acts, approximate dates, and any police responses.");
+        }
 
         // Move to a new sub-step (Step 4), but do NOT proceed to the next step automatically
         chatState.step = 4;
@@ -164,7 +167,10 @@ function nextStep() {
             sendBotMessage("What is your relationship with the abuser?");
             break;
         case 3:
-            sendBotMessageWithOptions("Which incident are you reporting?", ["Recent", "Past"]);
+            sendBotMessageWithOptions("Which incident are you reporting?", ["Most Recent", "Past Incidents"]);
+            break;
+        case 4:
+            // This is where the dynamic incident description question will be shown
             break;
         case 5:
             sendBotMessage("How has this affected you? This helps ensure your statement fully reflects your experience.");
@@ -175,7 +181,6 @@ function nextStep() {
             break;
     }
 }
-
 
 
 
