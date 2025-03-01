@@ -55,14 +55,21 @@ function saveCurrentChat() {
 
 
 
-// Add chat to sidebar
 function addChatToSidebar(chat) {
     let chatItem = document.createElement("li");
-    chatItem.textContent = `Chat ${chat.chatId.split("-")[1]}`;
+
+    // Ensure chat.chatId is defined and valid before splitting
+    if (chat.chatId && chat.chatId.split) {
+        chatItem.textContent = `Chat ${chat.chatId.split("-")[1]}`;
+    } else {
+        chatItem.textContent = "Chat [Unknown]";
+    }
+
     chatItem.dataset.chatId = chat.chatId;
     chatItem.addEventListener("click", () => restoreChat(chat.chatId));
     chatList.appendChild(chatItem);
 }
+
 
 // Restore a specific chat
 function restoreChat(chatId) {
