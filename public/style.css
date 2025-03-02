@@ -698,71 +698,61 @@ input[type="radio"]:active+label {
     border-radius: 15px;
     box-shadow: 0 3px 8px rgba(0, 0, 0, 0.1);
     margin: 10px 15px;
+    position: relative; /* Required for positioning */
 }
+
 /* Textarea */
 #user-input {
-    width: 50%;
-    padding: 22px 30px;
-    border-radius: 5px;
-    border:#000;
-    border-color: #000;
+    width: 60%; /* Adjusted width */
+    padding: 22px 50px 22px 20px; /* Extra padding on right for button space */
+    border-radius: 25px;
+    border: 1px solid #000;
     font-size: 18px;
     resize: none;
     background-color: #f7f7f7;
     color: rgb(5, 5, 5);
 }
-#user-input:focus {
-    outline: none;
-    border: 1px solid #ecf0f1;
-    /* Adds a subtle focus effect */
-}
-.input-container textarea,
-.input-container button {
-    border-radius: 8px;
-    box-shadow: 0 4px 10px rgb(255, 255, 255);
-}
 
+/* Ensure textarea styling matches */
 .input-container textarea {
-    background-color: #333;
-    color: #f8f8f8;
+    background-color: #f7f7f7;
+    color: rgb(5, 5, 5);
     border: none;
     padding: 10px;
     resize: none;
-    width: 50%;
-    border-radius: 10px;
-    box-shadow: 0 4px 15px rgba(255, 255, 255, 0.3);
+    width: 60%; /* Ensure width consistency */
+    border-radius: 25px;
+    box-shadow: none;
 }
 
-/* Send Button */
+/* Send Button inside Textarea */
 .input-container button {
-    width: 50px;
-    height: 50px;
-    padding: 0;
-    background-color: #f8f8f8;
-    color: white;
-    font-size: 17px;
+    position: absolute;
+    right: 20%;
+    top: 50%;
+    transform: translateY(-50%);
+    width: 40px;
+    height: 40px;
+    background: transparent; /* Remove button background */
     border: none;
-    border-radius: 50%;
     cursor: pointer;
     display: flex;
     align-items: center;
     justify-content: center;
-    transition: background-color 0.3s ease, transform 0.2s;
-    overflow: hidden;
 }
 
 /* Ensure PNG is properly displayed */
 .input-container button img {
-    width: 70%;
+    width: 28px; /* Adjust emoji size */
     height: auto;
     object-fit: contain;
 }
 
 /* Hover Effect */
 .input-container button:hover {
-    background-color: #5f9fd8;
-    transform: scale(1.1);
+    transform: translateY(-50%) scale(1.1); /* Keep position fixed but add effect */
 }
+
 
 /* Footer */
 .footer {

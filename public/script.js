@@ -140,9 +140,9 @@ function handleResponse(answer, question) {
         chatState.incidentType = answer; // Store the selected incident type (Most Recent/Past)
 
         // Dynamically generate the follow-up question based on selection
-        if (chatState.incidentType === "Most Recent") {
+        if (chatState.incidentType === "Recent") {
             sendBotMessage("Describe the most recent violent act, fear, or threat of violence, and why the temporary order should be entered today without notice to the respondent. Please provide specific details, including the approximate dates and police responses.");
-        } else if (chatState.incidentType === "Past Incidents") {
+        } else if (chatState.incidentType === "Past") {
             sendBotMessage("Describe the past incidents where you experienced violence, were afraid of injury, or where the respondent threatened to harm or kill you. Please include specific acts, approximate dates, and any police responses.");
         }
 
@@ -174,7 +174,7 @@ function nextStep() {
             sendBotMessage("What is your relationship with the abuser?");
             break;
         case 3:
-            sendBotMessageWithOptions("Which incident are you reporting?", ["Most Recent", "Past Incidents"]);
+            sendBotMessageWithOptions("Which incident are you reporting?", ["Recent", "Past"]);
             break;
         case 4:
             // This is where the dynamic incident description question will be shown
