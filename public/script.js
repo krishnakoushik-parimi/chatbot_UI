@@ -3,14 +3,13 @@ let chatBox = document.getElementById("chat-box");
 let userInput = document.getElementById("user-input");
 let sendButton = document.getElementById("send-button");
 let chatList = document.getElementById("chat-list");
-
 let chatState = {
     step: 0,
     userResponses: {},
     userName: "",
+    abuserName: "",
     chatId: ""
 };
-
 let chatHistory = JSON.parse(localStorage.getItem("chatHistory")) || [];
 
 // Initialize chat history and dark mode on page load
@@ -25,6 +24,53 @@ function generateChatId(userName) {
     let validName = userName && userName.trim() !== "" ? userName : "Anonymous";
     let timestamp = new Date().toLocaleString();
     return `${validName} - ${timestamp}`;
+}
+
+// Function to start a new chat
+function startChat() {
+    saveCurrentChat();
+    chatBox.innerHTML = "";
+    sendBotMessage("Hi, I am StaG. I can support you in documenting your experience for a 'Domestic Violence Protection Order'.");
+    sendBotMessage("To start, could you please tell me your name?");
+    chatState.step = 1; // Set step to 1 to indicate waiting for user name
+}
+
+// Function to save the current chat to history
+function saveCurrentChat() {
+    if (chatState.userResponses && Object.keys(chatState.userResponses).length > 0) {
+        let existingChatIndex = chatHistory.findIndex(chat => chat.chatId === chatState.chatId);
+        if (existingChatIndex !== -1) {
+            chatHistory[existingChatIndex] = { ...chatState, messages: chatBox.innerHTML };
+        } else {
+            chatHistory.push({ ...chatState, messages: chatBox.innerHTML });
+        }
+        localStorage.setItem("chatHistory", JSON.stringify(chatHistory));
+        updateChatHistoryUI();
+    }
+}
+
+// Function to add chat to sidebar
+function addChatToSidebar(chat) {
+    let chatItem = document.createElement("li");
+    chatItem.textContent = chat.chatId;
+    chatItem.dataset.chatId = chat.chatId;
+    chatItem.addEventListener("click", () => restoreChat(chat.chatId));
+    chatList.appendChild(chatItem);
+}
+
+// Function to restore a specific chat
+function restoreChat(chatId) {
+    let chat = chatHistory.find(c => c.chatId === chatId);
+    if (chat) {
+        chatState = { ...chat };
+        chatBox.innerHTML = chat.messages;
+    }
+}
+
+// Function to update the sidebar chat history UI
+function updateChatHistoryUI() {
+    chatList.innerHTML = "";
+    chatHistory.forEach(chat => addChatToSidebar(chat));
 }
 
 // Function to send bot message
@@ -59,73 +105,80 @@ function sendBotMessageWithOptions(question, options) {
     chatBox.scrollTop = chatBox.scrollHeight;
 }
 
-// Function to start a new chat
-function startChat() {
-    saveCurrentChat();
-    chatBox.innerHTML = "";
-
-    // Reset chat state
-    chatState = {
-        step: 0,
-        userResponses: {},
-        userName: "",
-        chatId: ""
-    };
-
-    sendBotMessage("Hi, I am StaG! I can support you in documenting your experience for a 'Domestic Violence Protection Order'.");
-    sendBotMessage("To start, could you please tell me your name?");
-    chatState.step = 1; // Move to the next step to capture the name
-}
-
-// Function to handle user responses
 function handleResponse(answer, question) {
+    const chatBox = document.getElementById("chat-box");
     let userMessage = createMessageElement("user", answer);
     chatBox.appendChild(userMessage);
-
     // Save the user response
     chatState.userResponses[chatState.step] = answer;
-
     // Disable radio buttons for the current question
     disableOptions(question);
-
+    // Handle different chat steps
     if (chatState.step === 1) {
-        // Capture the name
+        // Get user's name
         chatState.userName = answer;
         chatState.chatId = generateChatId(chatState.userName);
-        sendBotMessage(`Ok ${chatState.userName}, you can take this at your own pace. Please feel comfortable sharing your experiences!`);
-        chatState.step = 2; // Move to the next step to ask the relationship question
-        nextStep(); // Manually call nextStep to ask the relationship question
+        sendBotMessage(`Ok, ${chatState.userName}, you can take this at your own pace. If at any point you need a break, let me know.`);
+        sendBotMessage("What is the abuser's name? You can use a nickname or initials if that feels safer for you.");
+        chatState.step = 2;
+        //nextStep();
+    } else if (chatState.step === 2) {
+        chatState.abuserName = answer;
+        sendBotMessage("What is your relationship with the abuser? For example, are they your spouse, partner, ex-spouse, family member, or someone else?");
+        chatState.step = 3;
+        //nextStep();
     } else if (chatState.step === 3) {
-        chatState.incidentType = answer; // Store the selected incident type (Most Recent/Past)
-
-        // Dynamically generate the follow-up question based on selection
-        if (chatState.incidentType === "Recent") {
-            sendBotMessage("Describe the most recent violent act, fear, or threat of violence, and why the temporary order should be entered today without notice to the respondent. Please provide specific details, including the approximate dates and police responses.");
-        } else if (chatState.incidentType === "Past") {
-            sendBotMessage("Describe the past incidents where you experienced violence, were afraid of injury, or where the respondent threatened to harm or kill you. Please include specific acts, approximate dates, and any police responses.");
-        }
+        chatState.relationship = answer;
+        sendBotMessageWithOptions("Which incident are you reporting?", ["Recent", "Past"]);
         chatState.step = 4;
-        // Do not call nextStep here.  The user is expected to input text.
-        return;
     } else if (chatState.step === 4) {
-        chatState.step = 5;
-        nextStep();
+        if (answer === "Recent" || answer === "Past") {
+            chatState.incidentType = answer;
+            if (chatState.incidentType === "Recent") {
+                sendBotMessage("Describe the most recent violent act, fear, or threat of violence, and why the temporary order should be entered today without notice to the respondent. Please provide specific details, including the approximate dates and police responses.");
+            } else if (chatState.incidentType === "Past") {
+                sendBotMessage("Describe the past incidents where you experienced violence, were afraid of injury, or where the respondent threatened to harm or kill you. Please include specific acts, approximate dates, and any police responses.");
+            }
+            chatState.step = 5;
+        } else {
+            sendBotMessage("Please select from the given options: Recent or Past.");
+            return; // Don't proceed further
+        }
+        //nextStep();
+    } else if (chatState.step === 5) {
+        chatState.step = 6;
+        sendBotMessage("How has this affected you? This helps ensure your statement fully reflects your experience.");
+        sendBotMessage("Please describe the impact.");
+        //nextStep();
+    } else if (chatState.step === 6) {
+        sendBotMessage("Thank you for sharing your responses.");
+        chatState.step = 7;
     } else {
-        chatState.step++;
-        nextStep();
+        chatState.step++; // Normal progression
+        // Proceed to the next step
+        setTimeout(() => {
+            nextStep();
+        }, 500);
     }
 }
 
 // Function to handle the next step in conversation
 function nextStep() {
     switch (chatState.step) {
-        case 2:
-            sendBotMessage("What is your relationship with the abuser?");
-            break;
         case 3:
+            sendBotMessage("What is your relationship with the abuser? For example, are they your spouse, partner, ex-spouse, family member, or someone else?");
+            break;
+        case 4:
             sendBotMessageWithOptions("Which incident are you reporting?", ["Recent", "Past"]);
             break;
         case 5:
+            if (chatState.incidentType === "Recent") {
+                sendBotMessage("Describe the most recent violent act, fear, or threat of violence, and why the temporary order should be entered today without notice to the respondent. Please provide specific details, including the approximate dates and police responses.");
+            } else if (chatState.incidentType === "Past") {
+                sendBotMessage("Describe the past incidents where you experienced violence, were afraid of injury, or where the respondent threatened to harm or kill you. Please include specific acts, approximate dates, and any police responses.");
+            }
+            break;
+        case 6:
             sendBotMessage("How has this affected you? This helps ensure your statement fully reflects your experience.");
             sendBotMessage("Please describe the impact.");
             break;
@@ -135,50 +188,45 @@ function nextStep() {
     }
 }
 
-// Handle the response for name and other text inputs
-userInput.addEventListener("keydown", function (event) {
-    if (event.key === "Enter" && !event.shiftKey) {
-        event.preventDefault();
-        let userMessage = userInput.value.trim();
-        if (userMessage !== "") {
-            handleResponse(userMessage);
-            userInput.value = "";
-        }
-    }
-});
-
-// Button click event for sending messages
-document.getElementById("send-button").addEventListener("click", function () {
-    let message = userInput.value.trim();
-    if (message !== "") {
-        handleResponse(message);
-        userInput.value = "";
-    }
-});
-
 // Ensure the chat flow follows the correct sequence
 function ensureGreeting() {
     if (chatState.step === 0) {
-        startChat();
+        startChat(); // Send greeting first
     }
 }
 
-// Call ensureGreeting on page load
-window.onload = function () {
-    ensureGreeting();
-};
+// Handle the response for name and other text inputs
+userInput.addEventListener("keydown", function (event) {
+                if (event.key === "Enter" && !event.shiftKey) {
+                    event.preventDefault();
+                    let userMessage = userInput.value.trim();
+                    if (userMessage !== "") {
+                        handleResponse(userMessage);
+                        userInput.value = ""; // Clear input field
+                    }
+                }
+            });
+
+// Button click event for sending messages
+document.getElementById("send-button").addEventListener("click", function () {
+                let message = userInput.value.trim();
+                if (message !== "") {
+                    handleResponse(message);
+                    userInput.value = ""; // Clear input field
+                }
+            });
 
 // Disable radio options after selection
 function disableOptions(question) {
     let optionsDivs = document.querySelectorAll(".options");
     optionsDivs.forEach(optionsDiv => {
-        let radios = optionsDiv.querySelectorAll(`input[name='${question}']`);
-        radios.forEach(radio => {
-            if (!radio.checked) {
-                radio.disabled = true;
-            }
-        });
-    });
+                    let radios = optionsDiv.querySelectorAll(`input[name='${question}']`);
+                    radios.forEach(radio => {
+                            if (!radio.checked) {
+                                radio.disabled = true; // Disable only unselected options
+                            }
+                        });
+                });
 }
 
 // Function to create message elements for user and bot
@@ -187,7 +235,7 @@ function createMessageElement(sender, text) {
     messageDiv.className = `message ${sender}-message`;
     let profilePic = document.createElement("img");
     profilePic.className = "profile-pic";
-    profilePic.src = sender === "user" ? "user.png" : "bot-2.png";
+    profilePic.src = sender === "user" ? "user.png" : "bot.png";
     profilePic.alt = sender === "user" ? "User Profile" : "Bot Profile";
     let messageText = document.createElement("div");
     messageText.className = "text";
@@ -195,44 +243,6 @@ function createMessageElement(sender, text) {
     messageDiv.appendChild(profilePic);
     messageDiv.appendChild(messageText);
     return messageDiv;
-}
-
-// Save the current chat to history
-function saveCurrentChat() {
-    if (chatState.userResponses && Object.keys(chatState.userResponses).length > 0) {
-        let existingChatIndex = chatHistory.findIndex(chat => chat.chatId === chatState.chatId);
-        if (existingChatIndex !== -1) {
-            chatHistory[existingChatIndex] = { ...chatState, messages: chatBox.innerHTML };
-        } else {
-            chatHistory.push({ ...chatState, messages: chatBox.innerHTML });
-        }
-        localStorage.setItem("chatHistory", JSON.stringify(chatHistory));
-        updateChatHistoryUI();
-    }
-}
-
-// Function to add chat to sidebar
-function addChatToSidebar(chat) {
-    let chatItem = document.createElement("li");
-    chatItem.textContent = chat.chatId;
-    chatItem.dataset.chatId = chat.chatId;
-    chatItem.addEventListener("click", () => restoreChat(chat.chatId));
-    chatList.appendChild(chatItem);
-}
-
-// Restore a specific chat
-function restoreChat(chatId) {
-    let chat = chatHistory.find(c => c.chatId === chatId);
-    if (chat) {
-        chatState = { ...chat };
-        chatBox.innerHTML = chat.messages;
-    }
-}
-
-// Update the sidebar chat history UI
-function updateChatHistoryUI() {
-    chatList.innerHTML = "";
-    chatHistory.forEach(chat => addChatToSidebar(chat));
 }
 
 // Load chat history in sidebar
@@ -247,7 +257,15 @@ function clearAllChats() {
     chatList.innerHTML = "";
     chatBox.innerHTML = "";
     startChat();
+    updateChatHistoryUI();
 }
+
+// Trigger the greeting when the page loads
+window.onload = function () {
+    loadDarkModePreference();
+    loadChatHistory();
+    ensureGreeting(); // Call ensureGreeting to start the chat flow
+};
 
 // Function to toggle the chat history sidebar visibility
 function toggleChatHistory() {
