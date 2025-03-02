@@ -187,7 +187,7 @@ function createMessageElement(sender, text) {
     messageDiv.className = `message ${sender}-message`;
     let profilePic = document.createElement("img");
     profilePic.className = "profile-pic";
-    profilePic.src = sender === "user" ? "user.png" : "bot.png";
+    profilePic.src = sender === "user" ? "user.png" : "bot-2.png";
     profilePic.alt = sender === "user" ? "User Profile" : "Bot Profile";
     let messageText = document.createElement("div");
     messageText.className = "text";
