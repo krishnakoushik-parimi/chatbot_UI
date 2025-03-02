@@ -6,20 +6,16 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Chatbot UI</title>
     <link rel="stylesheet" href="style.css">
-    
-    
 </head>
 
 <body>
-
-
-    <div class="chat-container" id="chat-container" >
+    <div class="chat-container">
         <div class="header">
             <div class="chat-header">
                 <button id="chat-history-btn" onclick="toggleChatHistory()">📜
-                <span class="tooltip">Chat History</span></button>
+                    <span class="tooltip">Chat History</span></button>
                 <button id="new-chat-btn" onclick="startChat()">✚
-                <span class="tooltip">New Chat</span></button>
+                    <span class="tooltip">New Chat</span></button>
             </div>
             <div class="logo-container">
                 <img src="logo2.png" alt="Chatbot Logo" class="logo">
@@ -38,7 +34,6 @@
                     <div class="modal-body">
                         <p><strong>Project Goal:</strong> To create an interactive and engaging chatbot interface for various
                             applications. We aim to improve user experience through easy access to information.</p>
-            
                         <div class="developers">
                             <h4>Meet the Developers</h4>
                             <div class="developer">
@@ -66,105 +61,30 @@
                     </div>
                 </div>
             </div>
-
         </div>
 
         <!-- Chat History Sidebar -->
         <div id="chat-history-sidebar" class="sidebar">
             <div class="chat-history-header">
                 <h3>Chat History</h3>
-                <button id="clear-all-btn" onclick="clearAllChats()">🗑️ <span class="tooltip">Clear All Chats</span></button>
+                <button id="clear-all-btn" onclick="clearAllChats()">
+                    <span class="tooltip">Delete All Chats</span>
+                    🗑️
+                </button>
             </div>
             <ul id="chat-list"></ul>
         </div>
-        
         <div class="chat-box" id="chat-box">
-            <div class="bot-message message">
-                <img src="bot-2.png" class="profile-pic" alt="Bot Profile">
-                <div class="text">Hello! How can I help you today?</div>
-                <form>
-                    <input type="radio" id="recent" name="incident" value="Recent">
-                    <label for="recent">Recent</label>
-                
-                    <input type="radio" id="past" name="incident" value="Past">
-                    <label for="past">Past</label>
-                </form>
-
             </div>
-            
+
+        <div class="input-container">
+            <textarea id="user-input" placeholder="Type a message..." rows="1"></textarea>
+            <button id = "send-button">
+                <img src="send-icon-2.png" alt="Send">
+            </button>
         </div>
 
-        <!-- Particles div commented out -->
-<!-- <div id="tsparticles"> -->
-    <div class="input-container">
-        <textarea id="user-input" placeholder="Type a message..." rows="1"></textarea>
-        <button onclick="sendMessage()">
-            <img src="send-icon-2.png" alt="Send">
-        </button>
-    </div>
-<!-- </div> -->
-
-<!-- Particle script commented out -->
-<!-- <script src="https://cdn.jsdelivr.net/npm/tsparticles@1.38.0/tsparticles.min.js"></script> -->
-
-<script>
-    // Particle initialization commented out
-    /*
-    tsParticles.load("tsparticles", {
-        particles: {
-            number: {
-                value: 100
-            },
-            color: {
-                value: "#00FFFF" // Neon cyan color
-            },
-            shape: {
-                type: "circle"
-            },
-            opacity: {
-                value: 0.6
-            },
-            size: {
-                value: 3
-            },
-            move: {
-                enable: true,
-                speed: 3,
-                direction: "none",
-                random: true,
-                straight: false,
-                outModes: "out"
-            }
-        },
-        interactivity: {
-            events: {
-                onhover: {
-                    enable: true,
-                    mode: "connect"
-                },
-                onclick: {
-                    enable: true,
-                    mode: "push"
-                }
-            }
-        }
-    });
-    */
-
-    // Chat logic (kept the same)
-    function sendMessage() {
-        const userInput = document.getElementById("user-input").value;
-        if (userInput.trim() !== "") {
-            const messageBox = document.createElement("div");
-            messageBox.classList.add("user-message", "message");
-            messageBox.innerHTML = `<div class="text">${userInput}</div>`;
-            document.getElementById("chat-box").appendChild(messageBox);
-            document.getElementById("user-input").value = "";
-        }
-    }
-</script>
-
-<script src="script.js"></script>
+        <script src="script.js"></script>
 </body>
 
 </html>
