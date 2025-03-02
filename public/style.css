@@ -785,6 +785,6 @@ input[type="radio"]:active+label {
 }
 
 .bot-message:hover {
-    background: #cae9d7;
-    box-shadow: 0 8px 20px rgba(102, 199, 142, 0.8);
+    background: #5f9fd8;
+    box-shadow: 0 8px 20px rgba(52, 152, 219, 0.8);
 }
