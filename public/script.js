@@ -76,7 +76,7 @@ function updateChatHistoryUI() {
 
 // Function to send bot message with typing animation
 function sendBotMessage(message) {
-    let typingIndicator = createTypingIndicator();
+    let typingIndicator = showTypingIndicator();
     chatBox.appendChild(typingIndicator);
     chatBox.scrollTop = chatBox.scrollHeight;
 
@@ -89,24 +89,25 @@ function sendBotMessage(message) {
     }, 1500); // Adjust delay as needed
 }
 
-// Function to create a typing animation
-function createTypingIndicator() {
-    let typingDiv = document.createElement("div");
-    typingDiv.className = "message bot-message typing-indicator";
+function showTypingIndicator() {
+    let typingIndicator = document.createElement("div");
+    typingIndicator.className = "message bot-message typing-indicator";
 
     let profilePic = document.createElement("img");
-    profilePic.className = "profile-pic rotating"; // Apply rotating animation
-    profilePic.src = "bot-2.png";
+    profilePic.className = "profile-pic loading";
+    profilePic.src = "bot-2.png"; // Bot's profile pic
     profilePic.alt = "Bot Profile";
 
-    let dots = document.createElement("div");
+    let dots = document.createElement("span");
     dots.className = "typing-dots";
-    dots.innerHTML = "<span>.</span><span>.</span><span>.</span>"; // Typing effect
+    dots.innerHTML = `<span>.</span><span>.</span><span>.</span>`; // Typing animation
 
-    typingDiv.appendChild(profilePic);
-    typingDiv.appendChild(dots);
+    typingIndicator.appendChild(profilePic);
+    typingIndicator.appendChild(dots);
+    chatBox.appendChild(typingIndicator);
+    chatBox.scrollTop = chatBox.scrollHeight;
 
-    return typingDiv;
+    return typingIndicator; // Return this so it can be removed later
 }
 
 
@@ -137,6 +138,10 @@ function sendBotMessageWithOptions(question, options) {
 
 async function sendToFlask(incidentType, prompt) {
     const flaskEndpoint = 'http://149.165.175.242:5000/process_statement';
+
+    // Show the typing animation
+    let typingIndicator = showTypingIndicator();
+
     try {
         const requestBody = {
             "question_type": incidentType,
@@ -145,9 +150,7 @@ async function sendToFlask(incidentType, prompt) {
 
         const response = await fetch(flaskEndpoint, {
             method: 'POST',
-            headers: {
-                'Content-Type': 'application/json'
-            },
+            headers: { 'Content-Type': 'application/json' },
             body: JSON.stringify(requestBody)
         });
 
@@ -156,15 +159,21 @@ async function sendToFlask(incidentType, prompt) {
         }
 
         const data = await response.json();
-        return data; // Return the entire data object
+
+        // Remove typing animation
+        chatBox.removeChild(typingIndicator);
+
+        return data; // Return the processed response
     } catch (error) {
         console.error("Error sending data to Flask:", error);
-        return {
-            success: false,
-            error: "Sorry, I couldn't get a response from the server."
-        }; // Return an error object
+
+        // Remove typing animation and show error message
+        chatBox.removeChild(typingIndicator);
+        sendBotMessage("Sorry, I couldn't get a response from the server.");
+        return { success: false };
     }
 }
+
 
 function handleResponse(answer, question) {
     const chatBox = document.getElementById("chat-box");

@@ -883,8 +883,22 @@ input[type="radio"]:active+label {
     background: #96c8f3;
     box-shadow: 0 8px 20px rgba(126, 184, 223, 0.8);
 }
-/* Rotating profile picture */
-@keyframes rotate {
+
+
+.typing-indicator {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    padding: 8px 12px;
+}
+
+
+
+.profile-pic.loading {
+    animation: rotateProfile 1.5s linear infinite;
+}
+
+@keyframes rotateProfile {
     0% {
         transform: rotate(0deg);
     }
@@ -894,16 +908,14 @@ input[type="radio"]:active+label {
     }
 }
 
-.rotating {
-    animation: rotate 1s linear infinite;
-}
-
-/* Typing dots animation */
 .typing-dots span {
     animation: blink 1.5s infinite;
-    display: inline-block;
-    margin-right: 3px;
+    font-size: 18px;
     font-weight: bold;
+}
+
+.typing-dots span:nth-child(1) {
+    animation-delay: 0s;
 }
 
 .typing-dots span:nth-child(2) {
@@ -915,15 +927,13 @@ input[type="radio"]:active+label {
 }
 
 @keyframes blink {
-    0% {
+
+    0%,
+    100% {
         opacity: 0.3;
     }
 
     50% {
         opacity: 1;
-    }
-
-    100% {
-        opacity: 0.3;
     }
 }
