@@ -569,6 +569,7 @@ body {
     /* Deep legal blue */
     color: white;
     border-right: 5px solid #1f2b38;
+    text-align: left;
 }
 .user-message .profile-pic {
     width: 40px;
