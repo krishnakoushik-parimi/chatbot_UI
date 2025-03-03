@@ -74,14 +74,41 @@ function updateChatHistoryUI() {
     chatHistory.forEach(chat => addChatToSidebar(chat));
 }
 
-// Function to send bot message
+// Function to send bot message with typing animation
 function sendBotMessage(message) {
-    setTimeout(() => { // Simulate a delay before the bot responds
+    let typingIndicator = createTypingIndicator();
+    chatBox.appendChild(typingIndicator);
+    chatBox.scrollTop = chatBox.scrollHeight;
+
+    setTimeout(() => {
+        chatBox.removeChild(typingIndicator); // Remove typing animation
+
         let botMessage = createMessageElement("bot", message);
         chatBox.appendChild(botMessage);
         chatBox.scrollTop = chatBox.scrollHeight;
-    }, 500); // Adjust the delay as needed
+    }, 1500); // Adjust delay as needed
 }
+
+// Function to create a typing animation
+function createTypingIndicator() {
+    let typingDiv = document.createElement("div");
+    typingDiv.className = "message bot-message typing-indicator";
+
+    let profilePic = document.createElement("img");
+    profilePic.className = "profile-pic rotating"; // Apply rotating animation
+    profilePic.src = "bot-2.png";
+    profilePic.alt = "Bot Profile";
+
+    let dots = document.createElement("div");
+    dots.className = "typing-dots";
+    dots.innerHTML = "<span>.</span><span>.</span><span>.</span>"; // Typing effect
+
+    typingDiv.appendChild(profilePic);
+    typingDiv.appendChild(dots);
+
+    return typingDiv;
+}
+
 
 // Function to send bot message with options
 function sendBotMessageWithOptions(question, options) {
