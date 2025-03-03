@@ -8,6 +8,7 @@ let chatState = {
     userResponses: {},
     userName: "",
     abuserName: "",
+    incidentType: null,
     chatId: ""
 };
 let chatHistory = JSON.parse(localStorage.getItem("chatHistory")) || [];
@@ -16,7 +17,7 @@ let chatHistory = JSON.parse(localStorage.getItem("chatHistory")) || [];
 window.onload = function () {
     loadDarkModePreference();
     loadChatHistory();
-    startChat();
+    ensureGreeting();
 };
 
 // Function to generate a unique chat ID with Name + Timestamp
@@ -32,7 +33,7 @@ function startChat() {
     chatBox.innerHTML = "";
     sendBotMessage("Hi, I am StaG. I can support you in documenting your experience for a 'Domestic Violence Protection Order'.");
     sendBotMessage("To start, could you please tell me your name?");
-    chatState.step = 1; // Set step to 1 to indicate waiting for user name
+    chatState.step = 1;
 }
 
 // Function to save the current chat to history
@@ -75,9 +76,11 @@ function updateChatHistoryUI() {
 
 // Function to send bot message
 function sendBotMessage(message) {
-    let botMessage = createMessageElement("bot", message);
-    chatBox.appendChild(botMessage);
-    chatBox.scrollTop = chatBox.scrollHeight;
+    setTimeout(() => { // Simulate a delay before the bot responds
+        let botMessage = createMessageElement("bot", message);
+        chatBox.appendChild(botMessage);
+        chatBox.scrollTop = chatBox.scrollHeight;
+    }, 500); // Adjust the delay as needed
 }
 
 // Function to send bot message with options
@@ -105,85 +108,112 @@ function sendBotMessageWithOptions(question, options) {
     chatBox.scrollTop = chatBox.scrollHeight;
 }
 
+async function sendToFlask(incidentType, prompt) {
+    const flaskEndpoint = 'http://149.165.175.242:5000/process_statement';
+    try {
+        const requestBody = {
+            "question_type": incidentType,
+            "prompt": prompt
+        };
+
+        const response = await fetch(flaskEndpoint, {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json'
+            },
+            body: JSON.stringify(requestBody)
+        });
+
+        if (!response.ok) {
+            throw new Error(`HTTP error! Status: ${response.status}`);
+        }
+
+        const data = await response.json();
+        return data; // Return the entire data object
+    } catch (error) {
+        console.error("Error sending data to Flask:", error);
+        return {
+            success: false,
+            error: "Sorry, I couldn't get a response from the server."
+        }; // Return an error object
+    }
+}
+
 function handleResponse(answer, question) {
     const chatBox = document.getElementById("chat-box");
     let userMessage = createMessageElement("user", answer);
     chatBox.appendChild(userMessage);
+
     // Save the user response
     chatState.userResponses[chatState.step] = answer;
+
     // Disable radio buttons for the current question
     disableOptions(question);
-    // Handle different chat steps
+
     if (chatState.step === 1) {
         // Get user's name
         chatState.userName = answer;
         chatState.chatId = generateChatId(chatState.userName);
-        sendBotMessage(`Ok, ${chatState.userName}, you can take this at your own pace. If at any point you need a break, let me know.`);
-        sendBotMessage("What is the abuser's name? You can use a nickname or initials if that feels safer for you.");
+
+        // Send messages to the user and proceed to step 2
+        sendBotMessage(`Ok, ${chatState.userName}, you can take this at your own pace. Please feel free sharing your experiences.`);
+        sendBotMessage("What is your relationship with the abuser?");
         chatState.step = 2;
-        //nextStep();
     } else if (chatState.step === 2) {
-        chatState.abuserName = answer;
-        sendBotMessage("What is your relationship with the abuser? For example, are they your spouse, partner, ex-spouse, family member, or someone else?");
-        chatState.step = 3;
-        //nextStep();
-    } else if (chatState.step === 3) {
-        chatState.relationship = answer;
+        // Store abuser relationship and move to step 3
+        chatState.abuserRelationship = answer;
         sendBotMessageWithOptions("Which incident are you reporting?", ["Recent", "Past"]);
-        chatState.step = 4;
-    } else if (chatState.step === 4) {
+        chatState.step = 3;
+    } else if (chatState.step === 3) {
         if (answer === "Recent" || answer === "Past") {
             chatState.incidentType = answer;
-            if (chatState.incidentType === "Recent") {
+            chatState.step = 4;
+            if (answer === "Recent") {
                 sendBotMessage("Describe the most recent violent act, fear, or threat of violence, and why the temporary order should be entered today without notice to the respondent. Please provide specific details, including the approximate dates and police responses.");
-            } else if (chatState.incidentType === "Past") {
+            } else if (answer === "Past") {
                 sendBotMessage("Describe the past incidents where you experienced violence, were afraid of injury, or where the respondent threatened to harm or kill you. Please include specific acts, approximate dates, and any police responses.");
             }
-            chatState.step = 5;
         } else {
             sendBotMessage("Please select from the given options: Recent or Past.");
-            return; // Don't proceed further
+            return;
         }
-        //nextStep();
+    } else if (chatState.step === 4) {
+        // User has provided the incident description, send to Flask
+        const userPrompt = answer;
+        sendToFlask(chatState.incidentType, userPrompt).then(data => {
+            if (data.success) {
+                // Improved message flow
+                sendBotMessage("Here is your revised statement:");
+                sendBotMessage(data.revised_statement);
+                sendBotMessage("To structure the statement more effectively, please consider the following questions:");
+                let combinedQuestions = "";
+                data.questions.forEach((question, index) => {
+                    combinedQuestions += `${question}\n`;
+                });
+                sendBotMessage(combinedQuestions);
+            } else {
+                sendBotMessage(data.error || "Sorry, there was an error processing your request.");
+            }
+            chatState.step = 5;
+            nextStep();
+        });
+        return;
     } else if (chatState.step === 5) {
+        sendBotMessage("How has this affected you? Please describe the impact.\n This helps ensure your statement fully reflects your experience.");
         chatState.step = 6;
-        sendBotMessage("How has this affected you? This helps ensure your statement fully reflects your experience.");
-        sendBotMessage("Please describe the impact.");
-        //nextStep();
     } else if (chatState.step === 6) {
         sendBotMessage("Thank you for sharing your responses.");
         chatState.step = 7;
-    } else {
-        chatState.step++; // Normal progression
-        // Proceed to the next step
-        setTimeout(() => {
-            nextStep();
-        }, 500);
     }
 }
 
 // Function to handle the next step in conversation
 function nextStep() {
     switch (chatState.step) {
-        case 3:
-            sendBotMessage("What is your relationship with the abuser? For example, are they your spouse, partner, ex-spouse, family member, or someone else?");
-            break;
-        case 4:
-            sendBotMessageWithOptions("Which incident are you reporting?", ["Recent", "Past"]);
-            break;
-        case 5:
-            if (chatState.incidentType === "Recent") {
-                sendBotMessage("Describe the most recent violent act, fear, or threat of violence, and why the temporary order should be entered today without notice to the respondent. Please provide specific details, including the approximate dates and police responses.");
-            } else if (chatState.incidentType === "Past") {
-                sendBotMessage("Describe the past incidents where you experienced violence, were afraid of injury, or where the respondent threatened to harm or kill you. Please include specific acts, approximate dates, and any police responses.");
-            }
-            break;
-        case 6:
-            sendBotMessage("How has this affected you? This helps ensure your statement fully reflects your experience.");
-            sendBotMessage("Please describe the impact.");
+        case 7:
+            sendBotMessage("Thank you for sharing your responses.");
             break;
         default:
-            sendBotMessage("Thank you for sharing your responses.");
             break;
     }
 }
@@ -191,30 +221,30 @@ function nextStep() {
 // Ensure the chat flow follows the correct sequence
 function ensureGreeting() {
     if (chatState.step === 0) {
-        startChat(); // Send greeting first
+        startChat();
     }
 }
 
 // Handle the response for name and other text inputs
 userInput.addEventListener("keydown", function (event) {
-                if (event.key === "Enter" && !event.shiftKey) {
-                    event.preventDefault();
-                    let userMessage = userInput.value.trim();
-                    if (userMessage !== "") {
-                        handleResponse(userMessage);
-                        userInput.value = ""; // Clear input field
-                    }
+            if (event.key === "Enter" && !event.shiftKey) {
+                event.preventDefault();
+                let userMessage = userInput.value.trim();
+                if (userMessage !== "") {
+                    handleResponse(userMessage);
+                    userInput.value = "";
                 }
-            });
+            }
+        });
 
 // Button click event for sending messages
 document.getElementById("send-button").addEventListener("click", function () {
-                let message = userInput.value.trim();
-                if (message !== "") {
-                    handleResponse(message);
-                    userInput.value = ""; // Clear input field
-                }
-            });
+            let message = userInput.value.trim();
+            if (message !== "") {
+                handleResponse(message);
+                userInput.value = "";
+            }
+        });
 
 // Disable radio options after selection
 function disableOptions(question) {
@@ -223,7 +253,7 @@ function disableOptions(question) {
                     let radios = optionsDiv.querySelectorAll(`input[name='${question}']`);
                     radios.forEach(radio => {
                             if (!radio.checked) {
-                                radio.disabled = true; // Disable only unselected options
+                                radio.disabled = true;
                             }
                         });
                 });
@@ -256,27 +286,27 @@ function clearAllChats() {
     chatHistory = [];
     chatList.innerHTML = "";
     chatBox.innerHTML = "";
-    startChat();
-    updateChatHistoryUI();
-}
 
-// Trigger the greeting when the page loads
-window.onload = function () {
-    loadDarkModePreference();
-    loadChatHistory();
-    ensureGreeting(); // Call ensureGreeting to start the chat flow
-};
+    // Reset chatState
+    chatState = {
+        step: 0,
+        userResponses: {},
+        userName: "",
+        abuserName: "",
+        incidentType: null,
+        chatId: ""
+    };
+
+    startChat();
+}
 
 // Function to toggle the chat history sidebar visibility
 function toggleChatHistory() {
     let body = document.body;
-    let chatContainer = document.querySelector(".chat-container"); // This is the main content container
+    let chatContainer = document.querySelector(".chat-container");
     let sidebar = document.getElementById("chat-history-sidebar");
-    // Toggle the 'sidebar-open' class on the body for global styling (can control dimming effect etc.)
     body.classList.toggle("sidebar-open");
-    // Toggle the 'open' class on the sidebar to control visibility
     sidebar.classList.toggle("open");
-    // Toggle the 'sidebar-expanded' class on the chat-container to adjust the content width when sidebar is expanded
     chatContainer.classList.toggle("sidebar-expanded");
 }
 
