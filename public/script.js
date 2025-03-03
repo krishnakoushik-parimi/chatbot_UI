@@ -75,7 +75,7 @@ function updateChatHistoryUI() {
 }
 
 // Function to send bot message with typing animation
-function sendBotMessage(message) {
+function sendBotMessage(message, isHTML = false) {
     let typingIndicator = showTypingIndicator();
     chatBox.appendChild(typingIndicator);
     chatBox.scrollTop = chatBox.scrollHeight;
@@ -83,7 +83,7 @@ function sendBotMessage(message) {
     setTimeout(() => {
         chatBox.removeChild(typingIndicator); // Remove typing animation
 
-        let botMessage = createMessageElement("bot", message);
+        let botMessage = createMessageElement("bot", message, isHTML);
         chatBox.appendChild(botMessage);
         chatBox.scrollTop = chatBox.scrollHeight;
     }, 1500); // Adjust delay as needed
@@ -218,21 +218,24 @@ function handleResponse(answer, question) {
         const userPrompt = answer;
         sendToFlask(chatState.incidentType, userPrompt).then(data => {
             if (data.success) {
-                // Improved message flow
                 sendBotMessage("Here is your revised statement:");
                 sendBotMessage(data.revised_statement);
                 sendBotMessage("To structure the statement more effectively, please consider the following questions:");
-                let combinedQuestions = "";
-                data.questions.forEach((question, index) => {
-                    combinedQuestions += `${question}\n`;
-                });
-                sendBotMessage(combinedQuestions);
+
+                // Format questions with `<br>` for line breaks
+                let formattedQuestions = data.questions.map((question, index) => `${index + 1}. ${question}`).join("<br>");
+
+                // Pass 'true' to sendBotMessage to allow HTML rendering
+                sendBotMessage(formattedQuestions, true);
             } else {
                 sendBotMessage(data.error || "Sorry, there was an error processing your request.");
             }
             chatState.step = 5;
             nextStep();
         });
+
+
+
         return;
     } else if (chatState.step === 5) {
         sendBotMessage("How has this affected you? Please describe the impact.\n This helps ensure your statement fully reflects your experience.");
@@ -295,21 +298,29 @@ function disableOptions(question) {
                 });
 }
 
-// Function to create message elements for user and bot
-function createMessageElement(sender, text) {
+function createMessageElement(sender, text, isHTML = false) {
     let messageDiv = document.createElement("div");
     messageDiv.className = `message ${sender}-message`;
+
     let profilePic = document.createElement("img");
     profilePic.className = "profile-pic";
     profilePic.src = sender === "user" ? "user.png" : "bot-2.png";
     profilePic.alt = sender === "user" ? "User Profile" : "Bot Profile";
+
     let messageText = document.createElement("div");
     messageText.className = "text";
-    messageText.textContent = text;
+
+    if (isHTML) {
+        messageText.innerHTML = text;  // Render as HTML (supports <br>)
+    } else {
+        messageText.textContent = text;  // Render as plain text
+    }
+
     messageDiv.appendChild(profilePic);
     messageDiv.appendChild(messageText);
     return messageDiv;
 }
+
 
 // Load chat history in sidebar
 function loadChatHistory() {
