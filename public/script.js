@@ -3,6 +3,7 @@ let chatBox = document.getElementById("chat-box");
 let userInput = document.getElementById("user-input");
 let sendButton = document.getElementById("send-button");
 let chatList = document.getElementById("chat-list");
+
 let chatState = {
     step: 0,
     userResponses: {},
@@ -16,12 +17,14 @@ let chatState = {
     answers: [],
     followUpQuestions: [],
     currentQuestionIndex: 0,
-    followUpResponses: []
+    followUpResponses: [],
+    errorDisplayed: false // Added errorDisplayed to chatState
 };
+
 let chatHistory = JSON.parse(localStorage.getItem("chatHistory")) || [];
 
 // Initialize chat history and dark mode on page load
-window.onload = function () {
+window.onload = function() {
     loadDarkModePreference();
     loadChatHistory();
     ensureGreeting();
@@ -48,9 +51,13 @@ function saveCurrentChat() {
     if (chatState.userResponses && Object.keys(chatState.userResponses).length > 0) {
         let existingChatIndex = chatHistory.findIndex(chat => chat.chatId === chatState.chatId);
         if (existingChatIndex !== -1) {
-            chatHistory[existingChatIndex] = { ...chatState, messages: chatBox.innerHTML };
+            chatHistory[existingChatIndex] = { ...chatState,
+                messages: chatBox.innerHTML
+            };
         } else {
-            chatHistory.push({ ...chatState, messages: chatBox.innerHTML });
+            chatHistory.push({ ...chatState,
+                messages: chatBox.innerHTML
+            });
         }
         localStorage.setItem("chatHistory", JSON.stringify(chatHistory));
         updateChatHistoryUI();
@@ -70,7 +77,8 @@ function addChatToSidebar(chat) {
 function restoreChat(chatId) {
     let chat = chatHistory.find(c => c.chatId === chatId);
     if (chat) {
-        chatState = { ...chat };
+        chatState = { ...chat
+        };
         chatBox.innerHTML = chat.messages;
     }
 }
@@ -86,10 +94,8 @@ function sendBotMessage(message, isHTML = false) {
     let typingIndicator = showTypingIndicator();
     chatBox.appendChild(typingIndicator);
     chatBox.scrollTop = chatBox.scrollHeight;
-
     setTimeout(() => {
         chatBox.removeChild(typingIndicator); // Remove typing animation
-
         let botMessage = createMessageElement("bot", message, isHTML);
         chatBox.appendChild(botMessage);
         chatBox.scrollTop = chatBox.scrollHeight;
@@ -99,21 +105,17 @@ function sendBotMessage(message, isHTML = false) {
 function showTypingIndicator() {
     let typingIndicator = document.createElement("div");
     typingIndicator.className = "message bot-message typing-indicator";
-
     let profilePic = document.createElement("img");
     profilePic.className = "profile-pic loading";
     profilePic.src = "bot-2.png"; // Bot's profile pic
     profilePic.alt = "Bot Profile";
-
     let dots = document.createElement("span");
     dots.className = "typing-dots";
-    dots.innerHTML = `<span>.</span><span>.</span><span>.</span>`; // Typing animation
-
+    dots.innerHTML = `...`; // Typing animation
     typingIndicator.appendChild(profilePic);
     typingIndicator.appendChild(dots);
     chatBox.appendChild(typingIndicator);
     chatBox.scrollTop = chatBox.scrollHeight;
-
     return typingIndicator; // Return this so it can be removed later
 }
 
@@ -143,84 +145,29 @@ function sendBotMessageWithOptions(question, options) {
 }
 
 async function sendToFlask(incidentType, prompt) {
-    const flaskEndpoint = 'http://149.165.159.130:5000/process_statement';
-  
-    // Show the typing animation
-    let typingIndicator = showTypingIndicator();
-    chatBox.appendChild(typingIndicator); // Ensure it's added to the chatBox
-  
-    try {
-      const requestBody = {
-        "question_type": incidentType,
-        "prompt": prompt
-      };
-  
-      const response = await fetch(flaskEndpoint, {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify(requestBody)
-      });
-  
-      if (!response.ok) {
-        throw new Error(`HTTP error! Status: ${response.status}`);
-      }
-  
-      const data = await response.json();
-  
-      // Remove typing animation
-      chatBox.removeChild(typingIndicator);
-  
-      if (!data.success) {
-        throw new Error(data.error || "An error occurred while processing your request.");
-      }
-  
-      // MODIFICATION START - Display revised statement and questions one by one
-      sendBotMessage("Here is your revised statement:");
-      sendBotMessage(data.response.revised);
-  
-      chatState.originalText = data.response.original;
-      chatState.intermediateStatement = data.response.revised;
-      chatState.questions = data.response.follow_up_questions;
-      chatState.currentQuestionIndex = 0;
-      chatState.answers = [];
-  
-      // Ask the first question
-      askNextQuestion();
-      // MODIFICATION END
-  
-      return data;
-  
-    } catch (error) {
-      console.error("Error sending data to Flask:", error);
-      // Remove typing animation
-      chatBox.removeChild(typingIndicator);
-  
-      // MODIFICATION START - Display user-friendly error message
-      if (!chatState.errorDisplayed) {
-        sendBotMessage("Sorry, I couldn't process your request. Please reach out to the family law center.");
-        chatState.errorDisplayed = true; // Prevent multiple error messages
-      }
-      // MODIFICATION END
-  
-      return null; // Stop further flow
+    console.log("🛠️ Debugging sendToFlask...");
+    console.log("📌 incidentType:", incidentType);
+    console.log("📌 prompt:", prompt);
+
+    if (!incidentType || !prompt) {
+        console.error("❌ ERROR: Missing incidentType or prompt!");
+        sendBotMessage("Something went wrong. Please try again.");
+        return;
     }
-  }
 
-async function sendToFinalizeEndpoint(originalText, intermediateStatement, questions, answers) {
-    const finalizeEndpoint = 'http://149.165.170.102:5000/final_output';
-
-    // Show typing animation
+    const flaskEndpoint = 'http://149.165.159.130:5000/process_statement';
     let typingIndicator = showTypingIndicator();
+    chatBox.appendChild(typingIndicator);
 
     try {
         const requestBody = {
-            "original_text": originalText,
-            "intermediate_statement": intermediateStatement,
-            "questions": questions,
-            "answers": answers
+            "question_type": incidentType,
+            "prompt": prompt
         };
 
-        const response = await fetch(finalizeEndpoint, {
+        console.log("🚀 Sending request to Flask:", JSON.stringify(requestBody, null, 2));
+
+        const response = await fetch(flaskEndpoint, {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
             body: JSON.stringify(requestBody)
@@ -231,23 +178,72 @@ async function sendToFinalizeEndpoint(originalText, intermediateStatement, quest
         }
 
         const data = await response.json();
+        console.log("✅ Response from Flask:", data);
 
-        // Remove typing animation
         chatBox.removeChild(typingIndicator);
 
         if (!data.success) {
-            throw new Error(data.error || "An error occurred while finalizing your statement.");
+            throw new Error(data.error || "An error occurred while processing your request.");
         }
 
+        sendBotMessage("Here is your revised statement:");
+        sendBotMessage(data.response.revised);
+
+        chatState.originalText = data.response.original;
+        chatState.intermediateStatement = data.response.revised;
+        chatState.questions = data.response.follow_up_questions;
+        chatState.currentQuestionIndex = 0;
+        chatState.answers = [];
+
+        askQuestions();
+
+    } catch (error) {
+        console.error("❌ Error sending data to Flask:", error);
+        chatBox.removeChild(typingIndicator);
+        sendBotMessage("Sorry, I couldn't process your request. Please try again.");
+    }
+}
+
+
+
+
+
+async function sendToFinalizeEndpoint(originalText, intermediateStatement, questions, answers) {
+    const finalizeEndpoint = 'http://149.165.159.130:5000/final_output';
+    // Show typing animation
+    let typingIndicator = showTypingIndicator();
+    chatBox.appendChild(typingIndicator);
+    try {
+        const requestBody = {
+            "original_text": originalText,
+            "intermediate_statement": intermediateStatement,
+            "questions": questions,
+            "answers": answers
+        };
+        const response = await fetch(finalizeEndpoint, {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json'
+            },
+            body: JSON.stringify(requestBody)
+        });
+        if (!response.ok) {
+            throw new Error(`HTTP error! Status: ${response.status}`);
+        }
+        const data = await response.json();
+        // Remove typing animation
+        chatBox.removeChild(typingIndicator);
+        if (!data.success) {
+            throw new Error(data.error || "An error occurred while finalizing your statement.");
+        }
         return data;
     } catch (error) {
         console.error("Error sending data to finalize endpoint:", error);
-
         // Remove typing animation and send error message **only once**
         chatBox.removeChild(typingIndicator);
         if (!chatState.errorDisplayed) {
             sendBotMessage("Sorry, I couldn't process your request. Please try again later.");
-            chatState.errorDisplayed = true;  // Prevent multiple error messages
+            chatState.errorDisplayed = true; // Prevent multiple error messages
         }
         return null; // Stop further flow
     }
@@ -257,10 +253,8 @@ function handleResponse(answer, question) {
     const chatBox = document.getElementById("chat-box");
     let userMessage = createMessageElement("user", answer);
     chatBox.appendChild(userMessage);
-
     // Save the user response
     chatState.userResponses[chatState.step] = answer;
-
     // Disable radio buttons for the current question
     disableOptions(question);
 
@@ -279,11 +273,11 @@ function handleResponse(answer, question) {
         chatState.step = 3;
     } else if (chatState.step === 3) {
         if (answer === "Recent" || answer === "Past") {
-            chatState.incidentType = answer;
+            chatState.incidentType = answer.toLowerCase(); // Ensure correct casing
             chatState.step = 4;
             if (answer === "Recent") {
                 sendBotMessage("Describe the most recent violent act, fear, or threat of violence, and why the temporary order should be entered today without notice to the respondent. Please provide specific details, including the approximate dates and police responses.");
-            } else if (answer === "Past") {
+            } else {
                 sendBotMessage("Describe the past incidents where you experienced violence, were afraid of injury, or where the respondent threatened to harm or kill you. Please include specific acts, approximate dates, and any police responses.");
             }
         } else {
@@ -291,63 +285,69 @@ function handleResponse(answer, question) {
             return;
         }
     } else if (chatState.step === 4) {
-        // User has provided the incident description, send to Flask
-        const userPrompt = answer;
-        sendToFlask(chatState.incidentType, userPrompt).then(data => {
-            if (!data) return; // Stop execution if there's no response
+        chatState.incidentType = chatState.incidentType || "recent"; // Ensure a default value
+        console.log("🚀 Sending to Flask with:", chatState.incidentType, answer);
 
-            if (data.success) {
+        // ✅ Await the response properly
+        sendToFlask(chatState.incidentType, answer)
+            .then(data => {
+                if (!data || !data.success) {
+                    console.error("❌ Error: Invalid response from Flask");
+                    sendBotMessage("Sorry, there was an error processing your request.");
+                    return;
+                }
+
+                // ✅ Store returned data properly
                 chatState.originalText = data.response.original;
                 chatState.intermediateStatement = data.response.revised;
-                chatState.questions = data.response.follow_up_questions;
+                chatState.questions = data.response.follow_up_questions || [];
                 chatState.currentQuestionIndex = 0;
                 chatState.answers = [];
+                chatState.step = 5;
 
-                // Ask the first question
-                askNextQuestion();
-            } else {
-                if (!chatState.errorDisplayed) {
-                    sendBotMessage("Sorry, there was an error processing your request.");
-                    chatState.errorDisplayed = true;  // Prevent multiple error messages
+                if (chatState.questions.length > 0) {
+                    askNextQuestion(); // ✅ Use askNextQuestion() instead of undefined function
+                } else {
+                    sendBotMessage("No follow-up questions were generated.");
+                    prepareDataForSecondEndpoint();
                 }
-            }
-        });
-        return;
-
-    } else if (chatState.currentQuestionIndex > 0 && chatState.currentQuestionIndex <= chatState.questions.length) {
+            })
+            .catch(error => {
+                console.error("❌ Error sending data to Flask:", error);
+                sendBotMessage("Sorry, I couldn't process your request. Please try again.");
+            });
+        
+    } else if (chatState.step === 5) {
         // Handling follow-up question responses
         chatState.answers.push(answer);
-        if (chatState.currentQuestionIndex < chatState.questions.length) {
-            askNextQuestion();
-        } else {
-            chatState.step = 5;
-            nextStep();
-        }
 
-    } else if (chatState.step === 5) {
-        sendBotMessage("How has this affected you? Please describe the impact.\n This helps ensure your statement fully reflects your experience.");
-        chatState.step = 6;
+        if (chatState.currentQuestionIndex < chatState.questions.length) {
+            askQuestions(); // ✅ Use the correct function
+        } else {
+            chatState.step = 6;
+            prepareDataForSecondEndpoint();
+        }
     } else if (chatState.step === 6) {
-        sendBotMessage("Thank you for sharing your responses.");
+        sendBotMessage("How has this affected you? Please describe the impact.\n This helps ensure your statement fully reflects your experience.");
         chatState.step = 7;
+    } else if (chatState.step === 7) {
+        sendBotMessage("Thank you for sharing your responses.");
+        chatState.step = 8;
     }
 }
 
-
-
 // Function to ask the next follow-up question
-function askNextQuestion() {
+function askQuestions() {
     if (chatState.questions.length > 0 && chatState.currentQuestionIndex < chatState.questions.length) {
-      const question = chatState.questions[chatState.currentQuestionIndex];
-      sendBotMessage(question);
-      // Remove setting chatState.step = 4; here
-      chatState.currentQuestionIndex++;
+        const question = chatState.questions[chatState.currentQuestionIndex];
+        sendBotMessage(question);
+        chatState.currentQuestionIndex++;
     } else {
-      // No more questions, proceed to the next phase
-      chatState.step = 5;
-      nextStep();
+        // No more questions, proceed to the next phase
+        chatState.step = 6;
+        prepareDataForSecondEndpoint();
     }
-  }
+}
 
 // Function to handle the next step in conversation
 function nextStep() {
@@ -368,35 +368,85 @@ function nextStep() {
     }
 }
 
+function prepareDataForSecondEndpoint() {
+    const data = {
+        original_text: chatState.originalText,
+        intermediate_statement: chatState.intermediateStatement,
+        questions: chatState.questions,
+        answers: chatState.answers
+    };
+
+    const formattedData = JSON.stringify(data, null, 2);
+    sendBotMessage(`Data for second endpoint:\n${formattedData}`);
+    //console.log("Data prepared for the second endpoint:", data);
+
+    chatState.step = 6;
+    //nextStep();
+    finalizeStatement();
+}
+
 // Function to finalize statement using the new endpoint
 async function finalizeStatement() {
-    const { originalText, intermediateStatement, questions, answers } = chatState;
+    const {
+        originalText,
+        intermediateStatement,
+        questions,
+        answers
+    } = chatState;
+    const useSampleData = false; // Set this to TRUE to use sample data, FALSE to use the Flask endpoint
+    try {
+        let data; // Declare data outside the if/else blocks
 
-    sendToFinalizeEndpoint(originalText, intermediateStatement, questions, answers)
-    .then(data => {
-        if (!data) return; // Stop execution if there's no response
-
-        if (data.success) {
-            sendBotMessage("Here is your final statement:");
-            sendBotMessage(data.final_response.Final_Statement);
-
-            if (data.final_response.follow_up_questions && data.final_response.follow_up_questions.length > 0) {
-                chatState.questions = data.final_response.follow_up_questions;
-                chatState.currentQuestionIndex = 0;
-                askNextQuestion();
-            } else {
-                sendBotMessage("The statement is finalized. Thank you for your input.");
-                chatState.step = 7;
-                nextStep();
-            }
+        if (useSampleData) {
+            // Simulate the response from the second endpoint
+            data = {
+                "success": true,
+                "final_response": {
+                    "Final_Statement": "This is a simulated final statement."
+                }
+            };
+            console.log("Simulated Second Endpoint Response:", data); // Debugging: Log the entire data object
         } else {
-            if (!chatState.errorDisplayed) {
-                sendBotMessage("Sorry, there was an error finalizing your statement.");
-                chatState.errorDisplayed = true;  // Prevent multiple error messages
-            }
-        }
-    });
+            const response = await sendToFinalizeEndpoint(originalText, intermediateStatement, questions, answers);
 
+            if (!response) return; // Stop execution if there's no response
+
+            if (response.success) {
+                sendBotMessage("Here is your final statement:");
+                sendBotMessage(response.final_response.Final_Statement);
+                if (response.final_response.follow_up_questions && response.final_response.follow_up_questions.length > 0) {
+                    chatState.questions = response.final_response.follow_up_questions;
+                    chatState.currentQuestionIndex = 0;
+                    askNextQuestion();
+                } else {
+                    sendBotMessage("The statement is finalized. Thank you for your input.");
+                    chatState.step = 7;
+                    nextStep();
+                }
+            } else {
+                if (!chatState.errorDisplayed) {
+                    sendBotMessage("Sorry, there was an error finalizing your statement.");
+                    chatState.errorDisplayed = true; // Prevent multiple error messages
+                }
+            }
+            return;
+        }
+        // MODIFICATION START - Display final statement and questions one by one
+        sendBotMessage("Here is your final statement:");
+        sendBotMessage(data.final_response.Final_Statement);
+        sendBotMessage("The statement is finalized. Thank you for your input.");
+        chatState.step = 7;
+        nextStep();
+    } catch (error) {
+        console.error("Error sending data to finalize endpoint:", error);
+        // Remove typing animation and send error message **only once**
+        chatBox.removeChild(typingIndicator);
+        if (!chatState.errorDisplayed) {
+            sendBotMessage("Sorry, I couldn't process your request. Please try again later.");
+            chatState.errorDisplayed = true; // Prevent multiple error messages
+        }
+        return null; // Stop further flow
+    }
 }
 
 // Ensure the chat flow follows the correct sequence
@@ -407,7 +457,7 @@ function ensureGreeting() {
 }
 
 // Handle the response for name and other text inputs
-userInput.addEventListener("keydown", function (event) {
+userInput.addEventListener("keydown", function(event) {
     if (event.key === "Enter" && !event.shiftKey) {
         event.preventDefault();
         let userMessage = userInput.value.trim();
@@ -419,7 +469,7 @@ userInput.addEventListener("keydown", function (event) {
 });
 
 // Button click event for sending messages
-document.getElementById("send-button").addEventListener("click", function () {
+document.getElementById("send-button").addEventListener("click", function() {
     let message = userInput.value.trim();
     if (message !== "") {
         handleResponse(message);
@@ -443,26 +493,21 @@ function disableOptions(question) {
 function createMessageElement(sender, text, isHTML = false) {
     let messageDiv = document.createElement("div");
     messageDiv.className = `message ${sender}-message`;
-
     let profilePic = document.createElement("img");
     profilePic.className = "profile-pic";
     profilePic.src = sender === "user" ? "user.png" : "bot-2.png";
     profilePic.alt = sender === "user" ? "User Profile" : "Bot Profile";
-
     let messageText = document.createElement("div");
     messageText.className = "text";
-
     if (isHTML) {
-        messageText.innerHTML = text;  // Render as HTML (supports <br>)
+        messageText.innerHTML = text; // Render as HTML (supports <b>, etc.)
     } else {
-        messageText.textContent = text;  // Render as plain text
+        messageText.textContent = text; // Render as plain text
     }
-
     messageDiv.appendChild(profilePic);
     messageDiv.appendChild(messageText);
     return messageDiv;
 }
-
 
 // Load chat history in sidebar
 function loadChatHistory() {
@@ -475,7 +520,6 @@ function clearAllChats() {
     chatHistory = [];
     chatList.innerHTML = "";
     chatBox.innerHTML = "";
-
     // Reset chatState
     chatState = {
         step: 0,
@@ -490,11 +534,11 @@ function clearAllChats() {
         answers: [],
         followUpQuestions: [],
         currentQuestionIndex: 0,
-        followUpResponses: []
+        followUpResponses: [],
+        errorDisplayed: false // Also reset errorDisplayed here!
     };
-
     startChat();
-}
+} // MISSING BRACE HERE
 
 // Function to toggle the chat history sidebar visibility
 function toggleChatHistory() {
